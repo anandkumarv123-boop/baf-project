@@ -498,6 +498,73 @@ const CEILINGS = {
   check('TC48b completeness = 1/T', {c:r.completeness}, {c:1/TOTAL});
 }
 
+// TC49-TC52 — consistency-check.js (continuous-improvement learning-case layer). This is
+// a comparison/reporting module, not scoring math -- it never calls computeEngine, so
+// these tests exercise it directly against hand-built finalVec + scenario-answer pairs
+// rather than through the engine.
+{
+  const { checkConsistency } = require('../scripts/consistency-check');
+
+  // TC49 — clean agreement: engine strongly positive on RT, and every scenario answer
+  // touching RT ('buy-more', 'start-business', 'raise-funding') also implies positive RT.
+  {
+    const finalVec = { RT: 1.0, SC: 0, ER: 0, AR: 0, DS: 0, SR: 0 };
+    const answers = { 'market-crash': 'buy-more', 'job-loss': 'start-business', 'business-failure': 'raise-funding' };
+    let pass = true, diff = '';
+    try {
+      const report = checkConsistency(finalVec, answers);
+      const rt = report.perDimension.find(d => d.dimension === 'RT');
+      pass = rt.status === 'agree' && rt.touches === 3 && rt.agreements === 3 && rt.contradictions === 0 && Math.abs(rt.confidence - 0.3) < 1e-9;
+      if (!pass) diff = `got ${JSON.stringify(rt)}`;
+    } catch (e) { pass = false; diff = e.message; }
+    results.push({ name: 'TC49 consistency-check: clean agreement (RT, 3/3 scenarios agree)', pass, diffs: pass ? [] : [diff] });
+  }
+
+  // TC50 — clear contradiction: same 3 scenario answers (all imply positive RT), but the
+  // engine itself is strongly negative on RT.
+  {
+    const finalVec = { RT: -1.0, SC: 0, ER: 0, AR: 0, DS: 0, SR: 0 };
+    const answers = { 'market-crash': 'buy-more', 'job-loss': 'start-business', 'business-failure': 'raise-funding' };
+    let pass = true, diff = '';
+    try {
+      const report = checkConsistency(finalVec, answers);
+      const rt = report.perDimension.find(d => d.dimension === 'RT');
+      pass = rt.status === 'contradict' && rt.touches === 3 && rt.agreements === 0 && rt.contradictions === 3 && Math.abs(rt.confidence - 0.3) < 1e-9;
+      if (!pass) diff = `got ${JSON.stringify(rt)}`;
+    } catch (e) { pass = false; diff = e.message; }
+    results.push({ name: 'TC50 consistency-check: clear contradiction (RT, 0/3 scenarios agree)', pass, diffs: pass ? [] : [diff] });
+  }
+
+  // TC51 — partial/low-confidence: engine mildly positive on RT, but the two scenario
+  // answers touching RT point in opposite directions ('sell-half' implies negative,
+  // 'start-business' implies positive) -- mixed evidence, low confidence.
+  {
+    const finalVec = { RT: 0.5, SC: 0, ER: 0, AR: 0, DS: 0, SR: 0 };
+    const answers = { 'market-crash': 'sell-half', 'job-loss': 'start-business' };
+    let pass = true, diff = '';
+    try {
+      const report = checkConsistency(finalVec, answers);
+      const rt = report.perDimension.find(d => d.dimension === 'RT');
+      pass = rt.status === 'partial' && rt.touches === 2 && rt.agreements === 1 && rt.contradictions === 1 && Math.abs(rt.confidence - 0.1) < 1e-9;
+      if (!pass) diff = `got ${JSON.stringify(rt)}`;
+    } catch (e) { pass = false; diff = e.message; }
+    results.push({ name: 'TC51 consistency-check: partial/low-confidence (RT, 1/2 scenarios agree)', pass, diffs: pass ? [] : [diff] });
+  }
+
+  // TC52 — validation discipline: an unknown scenario id must throw, not silently ignore.
+  {
+    let pass = false, diff = '';
+    try {
+      checkConsistency({ RT: 0, SC: 0, ER: 0, AR: 0, DS: 0, SR: 0 }, { 'not-a-real-scenario': 'buy-more' });
+      diff = 'expected checkConsistency to throw on an unknown scenario id, it did not';
+    } catch (e) {
+      pass = /Unknown scenario id/.test(e.message);
+      if (!pass) diff = `threw, but wrong message: ${e.message}`;
+    }
+    results.push({ name: 'TC52 consistency-check: unknown scenario id rejected', pass, diffs: pass ? [] : [diff] });
+  }
+}
+
 // ---- report ----
 let passCount = 0;
 results.forEach(r=>{

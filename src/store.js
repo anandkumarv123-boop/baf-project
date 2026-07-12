@@ -116,4 +116,46 @@ async function getWeightVersion(version) {
   };
 }
 
-module.exports = { saveProfile, getProfile, listProfiles, saveWeightVersion, getWeightVersion, pool };
+// entry: { id, respondent_code, date, profile_id, scenario_answers, consistency_report,
+//          reviewer_notes, status, version } -- see migrations/002_learning_cases.sql.
+async function saveLearningCase(entry) {
+  await pool.query(
+    `INSERT INTO learning_cases
+       (id, respondent_code, date, profile_id, scenario_answers, consistency_report, reviewer_notes, status, version)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    [
+      entry.id, entry.respondent_code, entry.date, entry.profile_id,
+      JSON.stringify(entry.scenario_answers), JSON.stringify(entry.consistency_report),
+      entry.reviewer_notes || null, entry.status, entry.version,
+    ]
+  );
+  return entry;
+}
+
+async function getLearningCase(id) {
+  const { rows } = await pool.query(
+    `SELECT id, respondent_code, date, profile_id, scenario_answers, consistency_report, reviewer_notes, status, version
+     FROM learning_cases WHERE id = $1`,
+    [id]
+  );
+  const row = rows[0];
+  if (!row) return null;
+  return { ...row, date: toIso(row.date) };
+}
+
+async function listLearningCases({ status } = {}) {
+  const params = [];
+  let sql = 'SELECT id, respondent_code, date, profile_id, status, version FROM learning_cases';
+  if (status) {
+    params.push(status);
+    sql += ` WHERE status = $${params.length}`;
+  }
+  sql += ' ORDER BY date ASC';
+  const { rows } = await pool.query(sql, params);
+  return rows.map(row => ({ ...row, date: toIso(row.date) }));
+}
+
+module.exports = {
+  saveProfile, getProfile, listProfiles, saveWeightVersion, getWeightVersion,
+  saveLearningCase, getLearningCase, listLearningCases, pool,
+};

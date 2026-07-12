@@ -12,6 +12,8 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const { computeEngine, LAYER_WEIGHTS, ALL_SUB_IDS, DIMS } = require('./core-engine');
 const store = require('./store');
+const { SCENARIOS, getScenario, getOption } = require('../scripts/scenario-bank');
+const { checkConsistency } = require('../scripts/consistency-check');
 
 const app = express();
 app.use(cors());
@@ -122,6 +124,86 @@ app.post('/v1/weights', async (req, res) => {
   };
   await store.saveWeightVersion(entry);
   res.status(201).json(entry);
+});
+
+// ---- Learning cases (continuous-improvement external validation layer) ----
+// Compares an existing profile's engine output against scenario-based decisions
+// (scripts/scenario-bank.js / scripts/consistency-check.js). Additive only: does not
+// read or write anything under profiles.scores, and does not affect computeEngine.
+//
+// respondent_code is required to be an opaque code (letters/digits/hyphen/underscore,
+// max 32 chars) -- structurally rejects names, addresses, or other free-text identifiers
+// per the privacy constraints this feature was built under.
+const RESPONDENT_CODE_PATTERN = /^[A-Za-z0-9_-]{1,32}$/;
+const LEARNING_CASE_STATUSES = ['new', 'reviewed', 'actioned'];
+const DEFAULT_ENGINE_VERSION = 'v6.3';
+
+// POST /v1/learning-case
+// body: { respondent_code, profile_id, scenario_answers: {scenarioId: optionId},
+//         reviewer_notes?, version? }
+app.post('/v1/learning-case', async (req, res) => {
+  const { respondent_code, profile_id, scenario_answers = {}, reviewer_notes = null, version } = req.body || {};
+
+  if (!respondent_code || typeof respondent_code !== 'string' || !RESPONDENT_CODE_PATTERN.test(respondent_code)) {
+    return res.status(400).json({ error: 'respondent_code must be an opaque code (e.g. "R-0042"): letters, digits, "-", "_" only, no free text' });
+  }
+  if (!profile_id || typeof profile_id !== 'string') {
+    return res.status(400).json({ error: 'profile_id is required' });
+  }
+  const profile = await store.getProfile(profile_id);
+  if (!profile) {
+    return res.status(400).json({ error: `profile_id '${profile_id}' does not exist` });
+  }
+
+  const unknownScenarioIds = Object.keys(scenario_answers).filter(id => !getScenario(id));
+  if (unknownScenarioIds.length) {
+    return res.status(400).json({ error: 'Unknown scenario id(s)', unknownScenarioIds, validScenarioIds: SCENARIOS.map(s => s.id) });
+  }
+  for (const [scenarioId, optionId] of Object.entries(scenario_answers)) {
+    if (!getOption(scenarioId, optionId)) {
+      return res.status(400).json({
+        error: `Unknown option id '${optionId}' for scenario '${scenarioId}'`,
+        validOptionIds: getScenario(scenarioId).options.map(o => o.id),
+      });
+    }
+  }
+
+  let consistencyReport;
+  try {
+    consistencyReport = checkConsistency(profile.finalScore, scenario_answers);
+  } catch (e) {
+    return res.status(400).json({ error: e.message });
+  }
+
+  const learningCase = {
+    id: uuidv4(),
+    respondent_code,
+    date: new Date().toISOString(),
+    profile_id,
+    scenario_answers,
+    consistency_report: consistencyReport,
+    reviewer_notes,
+    status: 'new',
+    version: version || DEFAULT_ENGINE_VERSION,
+  };
+  await store.saveLearningCase(learningCase);
+  res.status(201).json(learningCase);
+});
+
+// GET /v1/learning-case/:id
+app.get('/v1/learning-case/:id', async (req, res) => {
+  const learningCase = await store.getLearningCase(req.params.id);
+  if (!learningCase) return res.status(404).json({ error: 'Learning case not found' });
+  res.json(learningCase);
+});
+
+// GET /v1/learning-case  (list, optional ?status=new|reviewed|actioned)
+app.get('/v1/learning-case', async (req, res) => {
+  const { status } = req.query;
+  if (status && !LEARNING_CASE_STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status filter', validStatuses: LEARNING_CASE_STATUSES });
+  }
+  res.json(await store.listLearningCases({ status }));
 });
 
 app.get('/v1/health', (req, res) => res.json({ status: 'ok', engine: 'BAF v6', subLayers: ALL_SUB_IDS.length }));
