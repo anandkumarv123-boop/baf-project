@@ -79,3 +79,11 @@ doc ("Honest Scope") for what this system can and cannot claim.
 All 6 routes exercised live during build: health, weights/latest, profile create
 (partial fill), profile get-by-id, 404 on missing profile, 400 on invalid sub-layer id,
 400 on weight-sum violation, profile list. Persistence confirmed across a server restart.
+
+## CI
+
+- `test.yml` runs on every push and PR: `npm install` then `npm test`
+  (`tests/test-cases.js` + `scripts/backtest.js`), failing the build on any failure.
+- `golden-profile-check.yml` runs on every PR: `npm run compare-golden` against
+  `golden-profiles/v6.3-baseline.json`, posted as a PR comment. Informational only,
+  not a merge gate.
