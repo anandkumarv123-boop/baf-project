@@ -1,0 +1,74 @@
+name: golden-profile-check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  compare-golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - name: Check for golden baseline
+        id: baseline
+        run: |
+          if [ -f "golden-profiles/v6.3-baseline.json" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # compare-golden.js is a report, not a gate (see its file header) -- `|| true` keeps
+      # that true here too, so a tooling failure inside it can't block the PR.
+      - name: Run golden-profile comparison
+        if: steps.baseline.outputs.exists == 'true'
+        run: npm run compare-golden > golden-compare-output.txt 2>&1 || true
+
+      - name: Post PR comment
+        uses: actions/github-script@v7
+        env:
+          BASELINE_EXISTS: ${{ steps.baseline.outputs.exists }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- golden-profile-check -->';
+            let body;
+            if (process.env.BASELINE_EXISTS === 'true') {
+              const output = fs.readFileSync('golden-compare-output.txt', 'utf8');
+              body = `${marker}\n### Golden Profile Comparison\n\nInformational only -- not a merge gate. Review any flagged drift before merging.\n\n\`\`\`\n${output}\n\`\`\`\n`;
+            } else {
+              body = `${marker}\n### Golden Profile Comparison\n\nNo golden-profile baseline found yet (\`golden-profiles/v6.3-baseline.json\` is missing), so the comparison was skipped. Run \`node scripts/golden-profiles.js\` to generate one.\n`;
+            }
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

@@ -1,6 +1,6 @@
 # BAF Engine API (v6)
 
-[![test](https://github.com/OWNER/REPO/actions/workflows/test.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/test.yml)
+[![test](https://github.com/anandkumarv123-boop/baf-project/actions/workflows/test.yml/badge.svg)](https://github.com/anandkumarv123-boop/baf-project/actions/workflows/test.yml)
 
 Real, runnable backend for the Behavioral Algorithm Framework scoring engine.
 Implements the API surface documented in `BAF_Technical_Architecture.docx` Section 3.5.
