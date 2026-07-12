@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BAF v6.3 — Confidence-Corrected: 47 Sub-Layers + Tier S, Verified Citations, Precision Mode</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+:root{
+  --bg:#0B0F13; --surface:#121821; --surface2:#1A222D; --line:#26313D;
+  --amber:#E8A33D; --teal:#4FD1C5; --text:#E7EDF0; --muted:#7E8FA0; --danger:#D9736A;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px 90px;}
+
+.hero{padding:56px 24px 36px;border-bottom:1px solid var(--line);}
+.eyebrow{color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;}
+.hero h1{font-size:34px;line-height:1.12;margin:0 0 14px;max-width:840px;}
+.hero p{color:var(--muted);max-width:700px;font-size:15px;line-height:1.6;}
+.tiers{display:flex;gap:0;margin-top:20px;flex-wrap:wrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.tiers span{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);padding:9px 14px;border-right:1px solid var(--line);}
+.tiers b{color:var(--teal);}
+.cta{margin-top:20px;background:var(--amber);color:#1A1200;border:none;padding:13px 24px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;border-radius:2px;cursor:pointer;}
+.honest{margin-top:16px;font-size:12.5px;color:var(--muted);border-left:2px solid var(--amber);padding-left:12px;line-height:1.6;max-width:700px;}
+
+.stage{display:grid;grid-template-columns:1.6fr 1fr;gap:0;margin-top:34px;border:1px solid var(--line);}
+@media (max-width:900px){.stage{grid-template-columns:1fr;}}
+.panel{padding:32px;}
+.wizard{border-right:1px solid var(--line);}
+.readout{background:var(--surface);position:sticky;top:0;align-self:start;}
+
+.layer-index{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:12px;margin-bottom:6px;}
+.layer-title{font-size:20px;margin:0 0 4px;}
+.layer-weight{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;}
+
+.sub{margin-bottom:24px;padding-bottom:20px;border-bottom:1px dashed var(--line);}
+.sub:last-of-type{border-bottom:none;}
+.sub-title{font-size:13.5px;font-weight:600;margin-bottom:10px;}
+.micro-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 6px;}
+
+.options{display:flex;flex-direction:column;gap:7px;}
+.opt{border:1px solid var(--line);background:var(--surface);padding:10px 13px;border-radius:2px;cursor:pointer;font-size:13px;}
+.opt:hover{border-color:var(--teal);}
+.opt.selected{border-color:var(--amber);background:#1C1710;}
+
+.slider-block{padding:4px 2px;}
+.slider-prompt{font-size:13px;color:var(--text);margin-bottom:10px;}
+.slider-row{display:flex;align-items:center;gap:12px;}
+input[type=range]{flex:1;accent-color:var(--muted);}
+input[type=range].touched{accent-color:var(--teal);}
+.slider-val{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);min-width:110px;text-align:right;}
+.slider-val.touched{color:var(--teal);}
+
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.navbtn{background:none;border:1px solid var(--line);color:var(--text);padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-size:13.5px;cursor:pointer;border-radius:2px;}
+.navbtn.next{border-color:var(--amber);color:var(--amber);}
+.navbtn:disabled{opacity:.3;cursor:not-allowed;}
+.progress{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+
+.readout h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 16px;}
+.dim-row{margin-bottom:13px;}
+.dim-row .label{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+.bar-track{height:6px;background:var(--surface2);position:relative;border-radius:3px;overflow:hidden;}
+.bar-fill{position:absolute;top:0;bottom:0;left:50%;background:var(--teal);}
+.bar-fill.neg{background:var(--danger);}
+.conf-block{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);}
+.conf-num{font-family:'JetBrains Mono',monospace;color:var(--amber);font-size:20px;}
+.conf-label{font-size:11px;color:var(--muted);}
+.tier-counts{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
+
+.dashboard{display:none;padding:40px 34px;}
+.dashboard.show{display:block;}
+.dash-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:baseline;}
+.dash-head h2{font-size:24px;margin:0;}
+.conf-tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;border:1px solid var(--teal);color:var(--teal);border-radius:20px;}
+.dash-sub{color:var(--muted);font-size:13.5px;margin:8px 0 26px;}
+
+.chart-row{display:grid;grid-template-columns:190px 1fr 50px;align-items:center;gap:14px;margin-bottom:12px;}
+.chart-row .label{font-size:12.5px;}
+.chart-row .track{height:10px;background:var(--surface2);border-radius:5px;position:relative;overflow:hidden;}
+.chart-row .fill{position:absolute;top:0;bottom:0;left:50%;border-radius:5px;background:var(--teal);}
+.chart-row .fill.neg{background:var(--danger);}
+.chart-row .val{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);text-align:right;}
+
+.section-label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:30px 0 12px;}
+table.trace{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px;}
+table.trace th{text-align:left;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;border-bottom:1px solid var(--line);}
+table.trace td{padding:8px 10px;border-bottom:1px solid var(--line);}
+table.trace td.num{font-family:'JetBrains Mono',monospace;color:var(--muted);}
+
+.narrative{background:var(--surface);border:1px solid var(--line);padding:20px;border-radius:3px;font-size:14.5px;line-height:1.7;margin:22px 0;}
+.narrative b{color:var(--amber);}
+.disclaimer{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;line-height:1.6;}
+.restart{margin-top:18px;background:none;border:1px solid var(--line);color:var(--text);padding:10px 20px;font-family:'Space Grotesk',sans-serif;cursor:pointer;border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">BAF v6.3 · Confidence-Corrected Engine — adds a dedicated Childhood Adversity (ACEs) sub-layer, one of the best-replicated effects in the Architecture doc's evidence catalogue</div>
+    <h1>Micro-indicators feed sub-layers. Sub-layers feed layers (and now Tier S). Layers feed the macro score.</h1>
+    <p>Every sub-layer carries two micro-indicators: one categorical fact, one continuous 5-point self-report statement. That's 94 individually-tracked data points across 47 sub-layers — finer resolution, fully traceable top to bottom.</p>
+    <div class="tiers">
+      <span>TIER 0 · <b>94 micro-indicators</b></span>
+      <span>TIER 1 · <b>47 sub-layers</b></span>
+      <span>TIER 2 · <b>8 layers + Tier S</b></span>
+      <span>TIER 3 · <b>1 macro score</b></span>
+    </div>
+    <div class="honest">Straight talk: more granularity = better resolution and full traceability, not certainty. This still self-reports on a heuristic framework, not a validated instrument — precision in the math doesn't create precision in human behavior. v6 added 2 sub-layers (Nutrition, Temperament) whose weight ceilings were deliberately reduced below the source paper's implied tier, because independent fact-checking found their supporting citations contested (Danziger 2011) or methodologically split (twin- vs. molecular-genetic heritability) — see Architecture doc Section 3.2b.4. v6.1 added 24 more sub-layers filling every remaining "Not yet implemented" row of that catalogue (excluding Domain 6's protected-attribute rows, which stay deliberately excluded per Section 6). v6.2 gave two of those — Grief and Major life transitions — a proper home: Tier S (Subacute), a 4th scoring tier sitting between the structural layers and the Modulator, matching the timing band (weeks-months) the source paper's Section 3.8.10.9 describes but v5/v6.1's architecture didn't yet model (Section 3.2b.2). Tier S reserves a fixed, undiluted 6% of the score when answered (re-normalized proportionally against the 8 layers above) and flags its own data stale after 35 days — informational only, it keeps counting toward the score even when stale. v6.3 adds Childhood Adversity (ACEs, Felitti et al. 1998) as its own Family & Upbringing sub-layer, at its full HIGH (1.50) weight — unlike Nutrition/Temperament, this citation was independently confirmed as accurate and one of the best-replicated effects in the whole catalogue, so its weight was not reduced. Treat the final score as a structured mirror, not a verdict.</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <button class="cta" onclick="document.getElementById('stage').scrollIntoView({behavior:'smooth'})">Run the engine ↓</button>
+      <button class="cta" id="precisionToggle" style="background:transparent;color:var(--teal);border:1px solid var(--teal);">Switch to Precision Test Mode</button>
+    </div>
+    <div id="testConsole" style="display:none;margin-top:22px;border:1px solid var(--line);padding:20px;background:var(--surface);">
+      <div class="micro-label" style="margin-bottom:8px;">Test Console — exact input / output (JSON)</div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.6;">Paste a JSON object of sub-layer vectors to load exact test values (each key = sub-layer id, value = {RT,SC,ER,AR,DS,SR} on a -2..2 scale). Every sub-layer id is listed below the box.</p>
+      <textarea id="jsonInput" rows="6" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px;" placeholder='{"terrain": {"RT":2,"SC":1,"ER":1,"AR":-1,"DS":0,"SR":1}, "stress": {"RT":-1,"SC":0,"ER":2,"AR":1,"DS":-1,"SR":-2}}'></textarea>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button class="navbtn" id="loadJsonBtn">Load JSON → engine</button>
+        <button class="navbtn" id="exportJsonBtn">Export current inputs as JSON</button>
+        <button class="navbtn" id="clearJsonBtn">Clear all precision inputs</button>
+      </div>
+      <div class="micro-label" style="margin-top:16px;">Valid sub-layer ids</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;" id="idList"></div>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="panel wizard" id="wizardPanel"></div>
+    <div class="panel readout" id="readoutPanel">
+      <h3>Live weighted readout</h3>
+      <div id="dimRows"></div>
+      <div class="conf-block">
+        <div class="conf-num" id="confNum">0%</div>
+        <div class="conf-label">Sub-layers answered (of <span id="subTotalLabel"></span>) — primary completeness metric</div>
+        <div class="tier-counts" id="tierCounts"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard panel" id="dashboard"></div>
+</div>
+
+<script>
+const DIMS = [
+  {k:'RT', label:'Risk Tolerance'},
+  {k:'SC', label:'Social Conformity'},
+  {k:'ER', label:'Emotional Reactivity'},
+  {k:'AR', label:'Authority Deference'},
+  {k:'DS', label:'Independent Decision-Making'},
+  {k:'SR', label:'Stress Resilience'},
+];
+const zeroVec = ()=>({RT:0,SC:0,ER:0,AR:0,DS:0,SR:0});
+const scaleVec = (v,s)=>{const o={}; DIMS.forEach(d=>o[d.k]=(v[d.k]||0)*s); return o;};
+const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+
+// Each sub-layer: id, title, weight-neutral within layer
+// micro: [ {id, type:'select', options:[{name,v}]}, {id, type:'slider', prompt, v} ]
+const LAYERS = [
+  { id:'geo', title:'Layer 1 — Geographic Origin', weight:0.10, subs:[
+    { id:'terrain', title:'Terrain type', micro:[
+      {id:'terrain_pick', type:'select', options:[
+        {name:'Coastal', v:{RT:2,SC:1,ER:1,AR:-1,DS:0,SR:1}},
+        {name:'Mountain / remote', v:{RT:1,SC:-1,ER:0,AR:-1,DS:2,SR:2}},
+        {name:'Dense urban', v:{RT:0,SC:1,ER:1,AR:0,DS:1,SR:-1}},
+        {name:'Rural / agrarian', v:{RT:-1,SC:2,ER:-1,AR:1,DS:-1,SR:2}},
+        {name:'Desert / arid', v:{RT:1,SC:2,ER:0,AR:1,DS:0,SR:2}},
+      ]},
+      {id:'terrain_slider', type:'slider', prompt:'Local geography strongly shaped my willingness to take risks', v:{RT:1.5,SC:0,ER:0,AR:0,DS:0,SR:0.5}},
+    ]},
+    { id:'climate', title:'Climate volatility', micro:[
+      {id:'climate_pick', type:'select', options:[
+        {name:'Stable / mild', v:{RT:-1,SC:0,ER:-1,AR:0,DS:0,SR:1}},
+        {name:'Seasonal / moderate swings', v:zeroVec()},
+        {name:'Extreme / volatile', v:{RT:1,SC:1,ER:1,AR:0,DS:0,SR:1}},
+      ]},
+      {id:'climate_slider', type:'slider', prompt:'I adapt easily when conditions around me change unpredictably', v:{RT:0.5,SC:0,ER:-1,AR:0,DS:0.5,SR:1}},
+    ]},
+    { id:'density', title:'Population density', micro:[
+      {id:'density_pick', type:'select', options:[
+        {name:'High density', v:{RT:0,SC:1,ER:1,AR:0,DS:0,SR:-1}},
+        {name:'Medium density', v:zeroVec()},
+        {name:'Low density / sparse', v:{RT:0,SC:-1,ER:-1,AR:0,DS:1,SR:1}},
+      ]},
+      {id:'density_slider', type:'slider', prompt:'I feel energized rather than drained in crowded environments', v:{RT:0,SC:0.5,ER:0.5,AR:0,DS:0,SR:-0.5}},
+    ]},
+  ]},
+  { id:'bio', title:'Layer 2 — Biological Foundation', weight:0.08, subs:[
+    { id:'energy', title:'Baseline energy', micro:[
+      {id:'energy_pick', type:'select', options:[
+        {name:'High', v:{RT:1,SC:0,ER:1,AR:-1,DS:1,SR:1}},
+        {name:'Moderate', v:zeroVec()},
+        {name:'Low / fatigued', v:{RT:-1,SC:0,ER:1,AR:1,DS:-1,SR:-2}},
+      ]},
+      {id:'energy_slider', type:'slider', prompt:'I sustain effort over long stretches without burning out', v:{RT:0.5,SC:0,ER:-0.5,AR:0,DS:0.5,SR:1.5}},
+    ]},
+    { id:'health', title:'Health status', micro:[
+      {id:'health_pick', type:'select', options:[
+        {name:'Robust', v:{RT:1,SC:0,ER:-1,AR:0,DS:0,SR:1}},
+        {name:'Managing a chronic condition', v:{RT:-1,SC:0,ER:1,AR:0,DS:0,SR:-1}},
+        {name:'Frequently unwell', v:{RT:-1,SC:0,ER:1,AR:1,DS:-1,SR:-2}},
+      ]},
+      {id:'health_slider', type:'slider', prompt:'Physical discomfort easily derails my mood or focus', v:{RT:-0.5,SC:0,ER:1.5,AR:0.5,DS:-0.5,SR:-1}},
+    ]},
+    { id:'age', title:'Age band', micro:[
+      {id:'age_pick', type:'select', options:[
+        {name:'18–25', v:{RT:1,SC:0,ER:1,AR:-1,DS:0,SR:0}},
+        {name:'26–40', v:zeroVec()},
+        {name:'41–60', v:{RT:-1,SC:0,ER:-1,AR:0,DS:1,SR:1}},
+        {name:'60+', v:{RT:-1,SC:1,ER:-1,AR:1,DS:0,SR:1}},
+      ]},
+      {id:'age_slider', type:'slider', prompt:'I feel my life stage makes me more deliberate than impulsive', v:{RT:-1,SC:0,ER:-0.5,AR:0.5,DS:0.5,SR:0.5}},
+    ]},
+    { id:'nutrition', title:'Nutrition / blood sugar state (v6 -- confidence-corrected 1.00 ceiling, see Architecture 3.2b.4)', micro:[
+      {id:'nutrition_pick', type:'select', options:[
+        {name:'Just eaten, blood sugar stable', v:{RT:0.3,SC:0,ER:-0.5,AR:0,DS:0.5,SR:0.5}},
+        {name:'A few hours since eating, mild hunger', v:{RT:0,SC:0,ER:0.3,AR:0,DS:-0.2,SR:-0.2}},
+        {name:"Haven't eaten in a while / low blood sugar", v:{RT:-0.7,SC:0.3,ER:0.7,AR:0.3,DS:-0.7,SR:-1.0}},
+      ]},
+      {id:'nutrition_slider', type:'slider', prompt:'Hunger or low blood sugar noticeably affects my mood and choices', v:{RT:-0.5,SC:0,ER:0.7,AR:0.3,DS:-0.5,SR:-0.7}},
+    ]},
+    { id:'temperament', title:'Inborn temperament (v6 -- confidence-corrected 1.25 ceiling, see Architecture 3.2b.4)', micro:[
+      {id:'temperament_pick', type:'select', options:[
+        {name:'High reactivity / sensitive temperament', v:{RT:-0.5,SC:0.3,ER:1.25,AR:0.3,DS:-0.5,SR:-1.0}},
+        {name:'Even-keeled / low-reactivity temperament', v:{RT:0.5,SC:-0.3,ER:-1.25,AR:-0.3,DS:0.5,SR:1.0}},
+        {name:'Mixed / context-dependent', v:zeroVec()},
+      ]},
+      {id:'temperament_slider', type:'slider', prompt:"Even under similar circumstances, I've always reacted more intensely than people around me", v:{RT:-0.3,SC:0.2,ER:1.0,AR:0.2,DS:-0.3,SR:-0.8}},
+    ]},
+    { id:'cognitive_style', title:'Cognitive style, analytical vs. intuitive (v6.1 -- HIGH tier ceiling 1.50, maps directly to Decision-Style; Kahneman 2011 System 1/2, see Architecture 3.2b.1 Domain 8)', micro:[
+      {id:'cognitive_style_pick', type:'select', options:[
+        {name:'Strongly analytical / deliberate (System 2 dominant)', v:{RT:-0.3,SC:-0.2,ER:-0.3,AR:-0.2,DS:1.5,SR:0.4}},
+        {name:'Balanced / context-dependent', v:zeroVec()},
+        {name:'Strongly intuitive / fast-thinking (System 1 dominant)', v:{RT:0.5,SC:0.2,ER:0.3,AR:0.1,DS:-1.5,SR:-0.2}},
+      ]},
+      {id:'cognitive_style_slider', type:'slider', prompt:'I trust my gut instinct over slow, deliberate analysis when making decisions', v:{RT:0.4,SC:0.1,ER:0.2,AR:0.1,DS:-1.3,SR:-0.1}},
+    ]},
+  ]},
+  { id:'family', title:'Layer 3 — Family & Upbringing', weight:0.18, subs:[
+    { id:'parenting', title:'Parenting style', micro:[
+      {id:'parenting_pick', type:'select', options:[
+        {name:'Authoritative (warm + structured)', v:{RT:0,SC:0,ER:-1,AR:0,DS:2,SR:2}},
+        {name:'Authoritarian (strict, low warmth)', v:{RT:-1,SC:1,ER:1,AR:2,DS:-2,SR:0}},
+        {name:'Permissive (warm, low structure)', v:{RT:2,SC:-1,ER:1,AR:-2,DS:1,SR:-1}},
+        {name:'Neglectful / low involvement', v:{RT:1,SC:-1,ER:2,AR:-1,DS:0,SR:-2}},
+      ]},
+      {id:'parenting_slider', type:'slider', prompt:'I second-guess decisions unless I get external approval first', v:{RT:-0.5,SC:1,ER:0.5,AR:1.5,DS:-1.5,SR:-0.5}},
+    ]},
+    { id:'birthorder', title:'Birth order', micro:[
+      {id:'birthorder_pick', type:'select', options:[
+        {name:'Firstborn', v:{RT:-1,SC:0,ER:0,AR:1,DS:1,SR:1}},
+        {name:'Middle child', v:{RT:0,SC:1,ER:0,AR:0,DS:0,SR:0}},
+        {name:'Youngest', v:{RT:1,SC:0,ER:1,AR:-1,DS:0,SR:0}},
+        {name:'Only child', v:{RT:0,SC:-1,ER:0,AR:0,DS:1,SR:0}},
+      ]},
+      {id:'birthorder_slider', type:'slider', prompt:'I naturally step into a caretaker/organizer role in groups', v:{RT:-0.5,SC:0.5,ER:-0.5,AR:1,DS:0.5,SR:0.5}},
+    ]},
+    { id:'stability', title:'Household stability', micro:[
+      {id:'stability_pick', type:'select', options:[
+        {name:'Stable / consistent', v:{RT:0,SC:0,ER:-1,AR:0,DS:0,SR:2}},
+        {name:'Frequent disruption / moves', v:{RT:1,SC:-1,ER:1,AR:-1,DS:1,SR:-1}},
+        {name:'High conflict household', v:{RT:-1,SC:0,ER:2,AR:0,DS:-1,SR:-2}},
+      ]},
+      {id:'stability_slider', type:'slider', prompt:'Sudden disruption rattles me more than it should', v:{RT:-0.5,SC:0,ER:1.5,AR:0,DS:-0.5,SR:-1.5}},
+    ]},
+    { id:'attachment_style', title:'Childhood attachment style (v6.1 -- HIGH tier ceiling 1.50, split out as its own sub-layer per Architecture 3.2b.1 Domain 7; overlaps "parenting" -- treat jointly with care to avoid double-counting)', micro:[
+      {id:'attachment_style_pick', type:'select', options:[
+        {name:'Secure (comfortable with closeness and independence)', v:{RT:0.5,SC:0,ER:-0.5,AR:-0.2,DS:0.8,SR:1.2}},
+        {name:'Anxious (craves closeness, fears abandonment)', v:{RT:-0.5,SC:0.8,ER:1.3,AR:0.5,DS:-0.9,SR:-1.2}},
+        {name:'Avoidant (values independence, uneasy with closeness)', v:{RT:0.8,SC:-1.2,ER:0.3,AR:-0.8,DS:1.0,SR:-0.5}},
+      ]},
+      {id:'attachment_style_slider', type:'slider', prompt:'In close relationships, I tend to worry about being abandoned or I rely heavily on distance to feel safe', v:{RT:-0.3,SC:0.5,ER:1.0,AR:0.3,DS:-0.6,SR:-1.0}},
+    ]},
+    { id:'past_failures', title:'Significant past failures and successes (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 7)', micro:[
+      {id:'past_failures_pick', type:'select', options:[
+        {name:"Past failures/successes feel processed, don't dominate outlook", v:{RT:0.3,SC:-0.1,ER:-0.2,AR:-0.1,DS:0.5,SR:0.7}},
+        {name:'Some past events still shape current confidence somewhat', v:{RT:-0.2,SC:0.2,ER:0.4,AR:0.2,DS:-0.3,SR:-0.3}},
+        {name:'A major past failure/success still strongly shapes how I approach things now', v:{RT:-0.6,SC:0.4,ER:0.8,AR:0.4,DS:-0.9,SR:-1.5}},
+      ]},
+      {id:'past_failures_slider', type:'slider', prompt:'A significant past success or failure still strongly shapes how I approach similar situations today', v:{RT:-0.5,SC:0.3,ER:0.7,AR:0.3,DS:-0.8,SR:-1.4}},
+    ]},
+    { id:'ace', title:'Childhood adversity / trauma — ACEs (v6.3 -- HIGH tier ceiling 1.50, confidence-confirmed 1.00x -- Felitti et al. 1998 dose-response independently verified as one of the best-replicated effects in the catalogue, see Architecture 3.2b.1 Domain 7 / 3.2b.4; overlaps "stability" sub -- treat jointly with care to avoid double-counting)', micro:[
+      {id:'ace_pick', type:'select', options:[
+        {name:'Low / no significant childhood adversity (0-1 ACEs)', v:{RT:0.2,SC:0,ER:-0.3,AR:0,DS:0.3,SR:0.8}},
+        {name:'Moderate childhood adversity (2-3 ACEs)', v:{RT:-0.3,SC:0.3,ER:0.8,AR:0.3,DS:-0.5,SR:-0.9}},
+        {name:'High childhood adversity (4+ ACEs)', v:{RT:-0.7,SC:0.4,ER:1.4,AR:0.5,DS:-1.0,SR:-1.5}},
+      ]},
+      {id:'ace_slider', type:'slider', prompt:'Difficult experiences in my childhood (abuse, neglect, household dysfunction) still measurably affect my choices and stress response today', v:{RT:-0.6,SC:0.3,ER:1.3,AR:0.4,DS:-0.9,SR:-1.4}},
+    ]},
+  ]},
+  { id:'culture', title:'Layer 4 — Cultural Programming', weight:0.12, subs:[
+    { id:'collectivism', title:'Collectivism index', micro:[
+      {id:'collectivism_pick', type:'select', options:[
+        {name:'Strongly collectivist', v:{RT:-1,SC:2,ER:0,AR:2,DS:-2,SR:1}},
+        {name:'Moderately collectivist', v:{RT:0,SC:1,ER:0,AR:1,DS:-1,SR:1}},
+        {name:'Balanced / bicultural', v:zeroVec()},
+        {name:'Moderately individualist', v:{RT:1,SC:-1,ER:0,AR:-1,DS:1,SR:0}},
+        {name:'Strongly individualist', v:{RT:2,SC:-2,ER:0,AR:-2,DS:2,SR:-1}},
+      ]},
+      {id:'collectivism_slider', type:'slider', prompt:'I feel uncomfortable going against group consensus', v:{RT:-1,SC:1.5,ER:0.5,AR:1,DS:-1.5,SR:0}},
+    ]},
+    { id:'tradition', title:'Tradition adherence', micro:[
+      {id:'tradition_pick', type:'select', options:[
+        {name:'High adherence', v:{RT:-1,SC:1,ER:0,AR:1,DS:-1,SR:1}},
+        {name:'Moderate', v:zeroVec()},
+        {name:'Low / rejecting', v:{RT:1,SC:-1,ER:0,AR:-1,DS:1,SR:0}},
+      ]},
+      {id:'tradition_slider', type:'slider', prompt:'I actively seek out new customs/approaches over familiar ones', v:{RT:1,SC:-1,ER:0,AR:-1,DS:1,SR:0}},
+    ]},
+  ]},
+  { id:'social', title:'Layer 5 — Social Network Influence', weight:0.12, subs:[
+    { id:'density_net', title:'Network density', micro:[
+      {id:'density_net_pick', type:'select', options:[
+        {name:'Large, tight-knit peer group', v:{RT:0,SC:2,ER:1,AR:1,DS:-1,SR:1}},
+        {name:'Small close circle', v:{RT:0,SC:1,ER:-1,AR:0,DS:0,SR:1}},
+        {name:'Solitary / few ties', v:{RT:1,SC:-2,ER:-1,AR:-1,DS:2,SR:0}},
+      ]},
+      {id:'density_net_slider', type:'slider', prompt:'My close relationships strongly influence my day-to-day choices', v:{RT:-0.5,SC:1.5,ER:0.5,AR:0.5,DS:-1,SR:0.5}},
+    ]},
+    { id:'digital_ratio', title:'Digital vs physical ratio', micro:[
+      {id:'digital_ratio_pick', type:'select', options:[
+        {name:'Mostly in-person', v:{RT:0,SC:1,ER:-1,AR:0,DS:0,SR:1}},
+        {name:'Balanced mix', v:zeroVec()},
+        {name:'Mostly digital / online', v:{RT:0,SC:0,ER:2,AR:-1,DS:0,SR:-1}},
+      ]},
+      {id:'digital_ratio_slider', type:'slider', prompt:'Online interactions affect my mood more than in-person ones', v:{RT:0,SC:0,ER:1.5,AR:-0.5,DS:0,SR:-1}},
+    ]},
+    { id:'social_comparison', title:'Social comparison / competitive pressure (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 4)', micro:[
+      {id:'social_comparison_pick', type:'select', options:[
+        {name:'Rarely compares self to others', v:{RT:0.3,SC:-0.4,ER:-0.2,AR:-0.2,DS:0.5,SR:0.4}},
+        {name:'Occasionally compares, mild competitive pull', v:{RT:0,SC:0.4,ER:0.3,AR:0.2,DS:-0.2,SR:-0.2}},
+        {name:'Frequently compares; strong competitive pressure', v:{RT:-0.3,SC:1.0,ER:0.8,AR:0.5,DS:-0.6,SR:-1.0}},
+      ]},
+      {id:'social_comparison_slider', type:'slider', prompt:'Seeing how others are doing compared to me strongly affects my mood and choices', v:{RT:-0.2,SC:0.9,ER:0.7,AR:0.4,DS:-0.5,SR:-0.9}},
+    ]},
+    { id:'relationship_conflict', title:'Relationship conflict — domestic/professional/familial (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 4)', micro:[
+      {id:'relationship_conflict_pick', type:'select', options:[
+        {name:'Currently low conflict in close relationships', v:{RT:0.2,SC:-0.1,ER:-0.2,AR:-0.1,DS:0.3,SR:0.4}},
+        {name:'Some ongoing tension in a close relationship', v:{RT:-0.2,SC:0.3,ER:0.5,AR:0.3,DS:-0.3,SR:-0.4}},
+        {name:'Significant ongoing conflict in a close relationship', v:{RT:-0.5,SC:0.5,ER:1.25,AR:0.5,DS:-0.6,SR:-1.1}},
+      ]},
+      {id:'relationship_conflict_slider', type:'slider', prompt:'Conflict with someone close to me is currently affecting my mood and focus', v:{RT:-0.4,SC:0.4,ER:1.1,AR:0.4,DS:-0.5,SR:-1.0}},
+    ]},
+    { id:'social_exclusion', title:'Social exclusion / rejection (v6.1 -- HIGH tier ceiling 1.50, confidence-confirmed 1.00x -- Eisenberger/Lieberman/Williams 2003 independently verified, see Architecture 3.2b.4)', micro:[
+      {id:'social_exclusion_pick', type:'select', options:[
+        {name:'Feels consistently included / connected', v:{RT:0.3,SC:0.2,ER:-0.3,AR:-0.1,DS:0.3,SR:0.6}},
+        {name:'Occasional feelings of exclusion', v:{RT:-0.2,SC:0.4,ER:0.6,AR:0.3,DS:-0.3,SR:-0.5}},
+        {name:'Significant recent exclusion or rejection', v:{RT:-0.5,SC:0.6,ER:1.5,AR:0.5,DS:-0.7,SR:-1.3}},
+      ]},
+      {id:'social_exclusion_slider', type:'slider', prompt:"Being excluded or rejected by others affects me more intensely than I'd expect", v:{RT:-0.4,SC:0.5,ER:1.3,AR:0.4,DS:-0.6,SR:-1.1}},
+    ]},
+  ]},
+  { id:'econ', title:'Layer 6 — Economic Conditions', weight:0.14, subs:[
+    { id:'current_stability', title:'Current economic stability', micro:[
+      {id:'current_stability_pick', type:'select', options:[
+        {name:'Stable / comfortable', v:{RT:1,SC:-1,ER:-1,AR:-1,DS:1,SR:1}},
+        {name:'Fluctuating / unstable', v:{RT:-1,SC:0,ER:1,AR:0,DS:0,SR:-1}},
+        {name:'Chronic scarcity', v:{RT:-2,SC:1,ER:2,AR:1,DS:-1,SR:-2}},
+      ]},
+      {id:'current_stability_slider', type:'slider', prompt:'Financial pressure is currently on my mind often', v:{RT:-1.5,SC:0.5,ER:1.5,AR:0.5,DS:-0.5,SR:-1.5}},
+    ]},
+    { id:'formative_scarcity', title:'Formative economic history', micro:[
+      {id:'formative_scarcity_pick', type:'select', options:[
+        {name:'Grew up abundant', v:{RT:1,SC:-1,ER:-1,AR:-1,DS:1,SR:1}},
+        {name:'Grew up moderate', v:zeroVec()},
+        {name:'Grew up scarce', v:{RT:-1,SC:1,ER:1,AR:1,DS:-1,SR:-1}},
+      ]},
+      {id:'formative_scarcity_slider', type:'slider', prompt:'I still think in scarcity terms even when resources are fine now', v:{RT:-1,SC:0.5,ER:1,AR:0.5,DS:-0.5,SR:-1}},
+    ]},
+    { id:'time_pressure', title:'Time pressure (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 5)', micro:[
+      {id:'time_pressure_pick', type:'select', options:[
+        {name:'Rarely feels rushed / plenty of time', v:{RT:0.3,SC:-0.1,ER:-0.3,AR:-0.2,DS:0.6,SR:0.5}},
+        {name:'Occasionally rushed / moderate time pressure', v:{RT:0.2,SC:0.2,ER:0.5,AR:0.3,DS:-0.4,SR:-0.3}},
+        {name:'Constantly under significant time pressure', v:{RT:0.8,SC:0.4,ER:1.5,AR:0.6,DS:-1.2,SR:-1.3}},
+      ]},
+      {id:'time_pressure_slider', type:'slider', prompt:'Being rushed noticeably changes the quality of decisions I make', v:{RT:0.6,SC:0.3,ER:1.3,AR:0.5,DS:-1.1,SR:-1.2}},
+    ]},
+  ]},
+  { id:'cognitive', title:'Layer 7 — Cognitive Schema & Education', weight:0.11, subs:[
+    { id:'education', title:'Education level', micro:[
+      {id:'education_pick', type:'select', options:[
+        {name:'Formal higher education', v:{RT:0,SC:-1,ER:-1,AR:-1,DS:2,SR:1}},
+        {name:'Vocational / trade training', v:zeroVec()},
+        {name:'Self-taught / autodidact', v:{RT:1,SC:-1,ER:0,AR:-2,DS:2,SR:0}},
+        {name:'Limited formal schooling', v:{RT:-1,SC:1,ER:0,AR:1,DS:-1,SR:0}},
+      ]},
+      {id:'education_slider', type:'slider', prompt:'I default to structured/analytical reasoning over gut instinct', v:{RT:0,SC:-0.5,ER:-1,AR:-0.5,DS:1.5,SR:0.5}},
+    ]},
+    { id:'schema_flex', title:'Belief schema flexibility', micro:[
+      {id:'schema_flex_pick', type:'select', options:[
+        {name:'Rigid / fixed', v:{RT:-1,SC:1,ER:1,AR:1,DS:-1,SR:0}},
+        {name:'Balanced', v:zeroVec()},
+        {name:'Highly flexible / lifelong learner', v:{RT:1,SC:0,ER:-1,AR:-1,DS:2,SR:1}},
+      ]},
+      {id:'schema_flex_slider', type:'slider', prompt:'I update my beliefs quickly when given new evidence', v:{RT:0.5,SC:0,ER:-0.5,AR:-0.5,DS:1.5,SR:1}},
+    ]},
+    { id:'cognitive_overload', title:'Cognitive overload (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+      {id:'cognitive_overload_pick', type:'select', options:[
+        {name:'Rarely overloaded', v:{RT:0.3,SC:0,ER:-0.2,AR:-0.2,DS:0.7,SR:0.5}},
+        {name:'Occasionally overloaded by too much input', v:{RT:-0.3,SC:0.2,ER:0.6,AR:0.3,DS:-0.7,SR:-0.5}},
+        {name:'Frequently overwhelmed by information/demands', v:{RT:-0.8,SC:0.4,ER:1.2,AR:0.6,DS:-1.5,SR:-1.0}},
+      ]},
+      {id:'cognitive_overload_slider', type:'slider', prompt:'When I have too much to process at once, my decisions get noticeably worse', v:{RT:-0.6,SC:0.3,ER:1.0,AR:0.5,DS:-1.3,SR:-0.9}},
+    ]},
+    { id:'decision_fatigue', title:'Decision fatigue (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+      {id:'decision_fatigue_pick', type:'select', options:[
+        {name:'Decision quality stays consistent all day', v:{RT:0.3,SC:-0.2,ER:-0.2,AR:-0.2,DS:0.8,SR:0.5}},
+        {name:'Some drop-off in decision quality later in the day', v:{RT:-0.2,SC:0.2,ER:0.4,AR:0.3,DS:-0.6,SR:-0.4}},
+        {name:'Sharp drop-off; defaults to easiest option when fatigued', v:{RT:-0.5,SC:0.6,ER:0.7,AR:0.9,DS:-1.5,SR:-0.8}},
+      ]},
+      {id:'decision_fatigue_slider', type:'slider', prompt:'By the end of a demanding day, I make noticeably worse decisions', v:{RT:-0.4,SC:0.5,ER:0.6,AR:0.8,DS:-1.4,SR:-0.7}},
+    ]},
+    { id:'anchoring_framing', title:'Anchoring and framing effects (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 3)', micro:[
+      {id:'anchoring_framing_pick', type:'select', options:[
+        {name:'Rarely swayed by how something is framed', v:{RT:0.4,SC:-0.2,ER:-0.1,AR:-0.3,DS:0.9,SR:0.3}},
+        {name:'Somewhat influenced by framing / first numbers seen', v:{RT:-0.2,SC:0.3,ER:0.2,AR:0.4,DS:-0.6,SR:-0.1}},
+        {name:'Strongly influenced by framing / initial anchors', v:{RT:-0.5,SC:0.6,ER:0.4,AR:0.8,DS:-1.25,SR:-0.3}},
+      ]},
+      {id:'anchoring_framing_slider', type:'slider', prompt:'The way information is presented to me changes my decision more than it probably should', v:{RT:-0.4,SC:0.5,ER:0.3,AR:0.7,DS:-1.1,SR:-0.2}},
+    ]},
+    { id:'sunk_cost', title:'Sunk cost fallacy (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+      {id:'sunk_cost_pick', type:'select', options:[
+        {name:'Cuts losses easily, ignores past investment', v:{RT:0.6,SC:-0.2,ER:-0.2,AR:-0.3,DS:1.0,SR:0.4}},
+        {name:'Somewhat reluctant to abandon past investment', v:{RT:-0.3,SC:0.3,ER:0.3,AR:0.3,DS:-0.7,SR:-0.2}},
+        {name:'Strongly persists with failing efforts due to past investment', v:{RT:-0.8,SC:0.5,ER:0.6,AR:0.6,DS:-1.5,SR:-0.6}},
+      ]},
+      {id:'sunk_cost_slider', type:'slider', prompt:"I keep going with something that isn't working because of what I've already put into it", v:{RT:-0.7,SC:0.4,ER:0.5,AR:0.5,DS:-1.4,SR:-0.5}},
+    ]},
+    { id:'availability_heuristic', title:'Availability heuristic (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 3)', micro:[
+      {id:'availability_heuristic_pick', type:'select', options:[
+        {name:'Weighs evidence broadly, not just recent/vivid examples', v:{RT:0.3,SC:-0.2,ER:-0.1,AR:-0.2,DS:0.8,SR:0.3}},
+        {name:'Somewhat swayed by recent or vivid examples', v:{RT:-0.2,SC:0.2,ER:0.3,AR:0.2,DS:-0.5,SR:-0.1}},
+        {name:'Judgments strongly driven by whatever comes to mind easily', v:{RT:-0.5,SC:0.4,ER:0.5,AR:0.4,DS:-1.25,SR:-0.3}},
+      ]},
+      {id:'availability_heuristic_slider', type:'slider', prompt:'A recent or memorable example sticks with me more than the overall evidence does', v:{RT:-0.4,SC:0.3,ER:0.4,AR:0.3,DS:-1.1,SR:-0.2}},
+    ]},
+    { id:'info_overload', title:'Information overload / analysis paralysis (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+      {id:'info_overload_pick', type:'select', options:[
+        {name:'Comfortable deciding with limited information', v:{RT:0.6,SC:-0.2,ER:-0.2,AR:-0.2,DS:0.9,SR:0.4}},
+        {name:"Sometimes stalls when there's too much to weigh", v:{RT:-0.3,SC:0.2,ER:0.4,AR:0.3,DS:-0.7,SR:-0.3}},
+        {name:'Frequently paralyzed by too many options/inputs', v:{RT:-0.7,SC:0.4,ER:0.7,AR:0.5,DS:-1.5,SR:-0.6}},
+      ]},
+      {id:'info_overload_slider', type:'slider', prompt:'Too many options or too much information makes it harder for me to decide at all', v:{RT:-0.6,SC:0.3,ER:0.6,AR:0.4,DS:-1.4,SR:-0.5}},
+    ]},
+  ]},
+  // v6.2: Tier S (Subacute) — Architecture doc Section 3.2b.2's proposed 4th scoring tier,
+  // sitting between the structural layers above and the Modulator below. Inputs here
+  // resolve in weeks-months (too slow for Modulator's "re-assessed every run", too
+  // transient to treat as structural/"fixed for the session"). Reserved-slice weighting:
+  // see SUBACUTE_WEIGHT / the shrink logic in computeAll() below. Each sub here carries an
+  // answer timestamp (subacuteAnsweredAt) and is flagged stale after SUBACUTE_EXPIRY_DAYS —
+  // informational only, does not exclude it from scoring. Vectors/ceilings unchanged from
+  // v6.1; only the owning layer and title wording moved.
+  { id:'subacute', title:'Tier S — Subacute Inputs (expires after 35 days, see Architecture 3.2b.2)', weight:0.06, subs:[
+    { id:'grief', title:'Grief and loss — recent bereavement or major loss (v6.2 -- MODERATE-HIGH tier ceiling 1.25, Tier S / Subacute, see Architecture 3.2b.2)', micro:[
+      {id:'grief_pick', type:'select', options:[
+        {name:'No recent significant loss', v:{RT:0,SC:0,ER:0,AR:0,DS:0,SR:0.2}},
+        {name:'Processing a recent loss, functioning mostly intact', v:{RT:-0.4,SC:0.3,ER:0.7,AR:0.2,DS:-0.5,SR:-0.7}},
+        {name:'Acute grief significantly disrupting daily life', v:{RT:-0.7,SC:0.4,ER:1.25,AR:0.3,DS:-0.9,SR:-1.1}},
+      ]},
+      {id:'grief_slider', type:'slider', prompt:'A recent loss is still significantly affecting how I think and feel day to day', v:{RT:-0.6,SC:0.3,ER:1.1,AR:0.3,DS:-0.8,SR:-1.0}},
+    ]},
+    { id:'life_transitions', title:'Major life transitions — divorce, bereavement, relocation, career change (v6.2 -- MODERATE-HIGH tier ceiling 1.25, Tier S / Subacute, see Architecture 3.2b.2)', micro:[
+      {id:'life_transitions_pick', type:'select', options:[
+        {name:'No major transition currently underway', v:{RT:0,SC:0,ER:-0.1,AR:0,DS:0.1,SR:0.3}},
+        {name:'Navigating a moderate life transition', v:{RT:0.3,SC:0.2,ER:0.5,AR:0.2,DS:-0.3,SR:-0.5}},
+        {name:'In the middle of a major, disruptive life transition', v:{RT:0.6,SC:0.4,ER:1.25,AR:0.4,DS:-0.7,SR:-1.1}},
+      ]},
+      {id:'life_transitions_slider', type:'slider', prompt:"A major life change I'm currently going through is significantly affecting my choices", v:{RT:0.5,SC:0.3,ER:1.1,AR:0.3,DS:-0.6,SR:-1.0}},
+    ]},
+  ]},
+  { id:'modulator', title:'Modulator Layer — Current State', weight:0.15, subs:[
+    { id:'ego', title:'Ego posture', micro:[
+      {id:'ego_pick', type:'select', options:[
+        {name:'Secure', v:{RT:1,SC:0,ER:-1,AR:0,DS:1,SR:2}},
+        {name:'Fragile', v:{RT:-1,SC:1,ER:2,AR:1,DS:-1,SR:-2}},
+        {name:'Inflated', v:{RT:2,SC:-2,ER:1,AR:-2,DS:1,SR:0}},
+        {name:'Depleted / burned out', v:{RT:-2,SC:0,ER:1,AR:1,DS:-2,SR:-2}},
+      ]},
+      {id:'ego_slider', type:'slider', prompt:'Criticism affects my mood far more than most people around me', v:{RT:-0.5,SC:0.5,ER:1.5,AR:0.5,DS:-0.5,SR:-1.5}},
+    ]},
+    { id:'stress', title:'Current stress level', micro:[
+      {id:'stress_pick', type:'select', options:[
+        {name:'Low', v:{RT:1,SC:0,ER:-1,AR:0,DS:1,SR:1}},
+        {name:'Moderate', v:zeroVec()},
+        {name:'High', v:{RT:-1,SC:1,ER:2,AR:1,DS:-1,SR:-2}},
+      ]},
+      {id:'stress_slider', type:'slider', prompt:'I can name specific things causing me stress right now', v:{RT:-0.5,SC:0,ER:1,AR:0.5,DS:-0.5,SR:-1}},
+    ]},
+    { id:'sleep', title:'Sleep quality', micro:[
+      {id:'sleep_pick', type:'select', options:[
+        {name:'Good', v:{RT:0,SC:0,ER:-1,AR:0,DS:0,SR:1}},
+        {name:'Poor', v:{RT:0,SC:0,ER:1,AR:0,DS:0,SR:-1}},
+      ]},
+      {id:'sleep_slider', type:'slider', prompt:'Poor sleep visibly changes how I react to people', v:{RT:0,SC:0,ER:1.5,AR:0,DS:0,SR:-1}},
+    ]},
+    { id:'dehydration', title:'Dehydration (v6.1 -- LOW-MODERATE tier ceiling 0.75, see Architecture 3.2b.1 Domain 1)', micro:[
+      {id:'dehydration_pick', type:'select', options:[
+        {name:'Well hydrated', v:{RT:0.1,SC:0,ER:-0.2,AR:0,DS:0.2,SR:0.2}},
+        {name:'Mild dehydration (thirsty, slight headache)', v:{RT:-0.1,SC:0,ER:0.3,AR:0.1,DS:-0.2,SR:-0.3}},
+        {name:'Noticeably dehydrated (dizzy, hard to concentrate)', v:{RT:-0.3,SC:0.1,ER:0.5,AR:0.2,DS:-0.5,SR:-0.75}},
+      ]},
+      {id:'dehydration_slider', type:'slider', prompt:'Not drinking enough water noticeably affects my focus and mood', v:{RT:-0.2,SC:0.1,ER:0.5,AR:0.2,DS:-0.4,SR:-0.75}},
+    ]},
+    { id:'hormonal', title:'Hormonal fluctuation — testosterone, estrogen, cortisol, thyroid, insulin (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 1)', micro:[
+      {id:'hormonal_pick', type:'select', options:[
+        {name:'Stable / balanced', v:{RT:0.1,SC:0,ER:-0.2,AR:0,DS:0.2,SR:0.3}},
+        {name:'Noticeable cyclical fluctuation (mood/energy shifts)', v:{RT:-0.2,SC:0.2,ER:0.7,AR:0.2,DS:-0.4,SR:-0.6}},
+        {name:'Significant fluctuation strongly affecting mood/energy', v:{RT:-0.4,SC:0.3,ER:1.25,AR:0.4,DS:-0.7,SR:-1.0}},
+      ]},
+      {id:'hormonal_slider', type:'slider', prompt:'Hormonal changes noticeably affect my mood, energy, or decision-making', v:{RT:-0.3,SC:0.2,ER:1.0,AR:0.3,DS:-0.6,SR:-0.8}},
+    ]},
+    { id:'substance_state', title:'Alcohol / substance state (v6.1 -- HIGH(acute) tier ceiling 1.50 [acute tier used; MODERATE applies to next-day/chronic state], see Architecture 3.2b.1 Domain 1)', micro:[
+      {id:'substance_state_pick', type:'select', options:[
+        {name:'Sober / clear-headed', v:{RT:-0.2,SC:0,ER:-0.2,AR:0,DS:0.3,SR:0.3}},
+        {name:'Mildly under the influence', v:{RT:0.8,SC:-0.3,ER:0.4,AR:-0.5,DS:-0.7,SR:-0.5}},
+        {name:'Significantly under the influence / acute intoxication', v:{RT:1.5,SC:-0.7,ER:0.8,AR:-1.0,DS:-1.5,SR:-0.8}},
+      ]},
+      {id:'substance_state_slider', type:'slider', prompt:'Alcohol or substance use noticeably changes my risk-taking and self-control', v:{RT:1.5,SC:-0.5,ER:0.5,AR:-0.8,DS:-1.2,SR:-0.5}},
+    ]},
+    { id:'depression', title:'Depression — self-reported low mood / anhedonia (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 2)', micro:[
+      {id:'depression_pick', type:'select', options:[
+        {name:'No notable low mood', v:{RT:0.1,SC:0,ER:-0.1,AR:0,DS:0.2,SR:0.3}},
+        {name:'Occasional low mood / reduced motivation', v:{RT:-0.5,SC:0.2,ER:0.5,AR:0.3,DS:-0.6,SR:-0.7}},
+        {name:'Persistent low mood / anhedonia', v:{RT:-1.0,SC:0.3,ER:0.8,AR:0.5,DS:-1.2,SR:-1.5}},
+      ]},
+      {id:'depression_slider', type:'slider', prompt:'Low mood or lack of motivation has been affecting my daily functioning', v:{RT:-0.8,SC:0.2,ER:0.7,AR:0.4,DS:-1.0,SR:-1.5}},
+    ]},
+    { id:'fear_failure', title:'Fear of failure / rejection sensitivity (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 2)', micro:[
+      {id:'fear_failure_pick', type:'select', options:[
+        {name:'Low fear of failure', v:{RT:0.8,SC:-0.3,ER:-0.3,AR:-0.3,DS:0.6,SR:0.5}},
+        {name:'Moderate fear of failure', v:{RT:-0.3,SC:0.4,ER:0.5,AR:0.5,DS:-0.5,SR:-0.4}},
+        {name:'High fear of failure / rejection sensitivity', v:{RT:-1.5,SC:0.8,ER:1.2,AR:0.9,DS:-1.0,SR:-0.9}},
+      ]},
+      {id:'fear_failure_slider', type:'slider', prompt:'Fear of failing or being rejected strongly shapes what I choose to do', v:{RT:-1.2,SC:0.6,ER:1.0,AR:0.8,DS:-0.9,SR:-0.7}},
+    ]},
+    { id:'emotional_trauma', title:'Emotional trauma, past or recent — self-described, non-diagnostic (v6.1 -- HIGH(triggered) tier ceiling 1.50 [triggered tier used; MODERATE applies to baseline state]; overlaps Family layer\'s "stability" sub -- treat jointly with care to avoid double-counting, see Architecture 3.2b.1 Domain 2)', micro:[
+      {id:'emotional_trauma_pick', type:'select', options:[
+        {name:'No significant unresolved trauma', v:{RT:0.1,SC:0,ER:-0.1,AR:0,DS:0.1,SR:0.2}},
+        {name:'Some past difficulty, mostly resolved', v:{RT:-0.2,SC:0.2,ER:0.5,AR:0.2,DS:-0.3,SR:-0.4}},
+        {name:'Significant past trauma that still surfaces under stress', v:{RT:-0.6,SC:0.3,ER:1.5,AR:0.4,DS:-0.8,SR:-1.3}},
+      ]},
+      {id:'emotional_trauma_slider', type:'slider', prompt:'Past difficult experiences still get triggered by things that remind me of them', v:{RT:-0.5,SC:0.3,ER:1.3,AR:0.3,DS:-0.7,SR:-1.2}},
+    ]},
+    { id:'anger_resentment', title:'Anger and stored resentment (v6.1 -- HIGH(triggered) tier ceiling 1.50 [triggered tier used; MODERATE applies to chronic state], see Architecture 3.2b.1 Domain 2)', micro:[
+      {id:'anger_resentment_pick', type:'select', options:[
+        {name:'Rarely angry / lets things go', v:{RT:0.2,SC:-0.1,ER:-0.3,AR:-0.2,DS:0.4,SR:0.5}},
+        {name:"Occasionally angry, doesn't linger long", v:{RT:0,SC:0.1,ER:0.4,AR:0.2,DS:-0.2,SR:-0.2}},
+        {name:'Frequently angry / holds onto resentment', v:{RT:0.6,SC:-0.3,ER:1.5,AR:-0.6,DS:-0.5,SR:-1.2}},
+      ]},
+      {id:'anger_resentment_slider', type:'slider', prompt:'I hold onto anger or resentment longer than most people around me', v:{RT:0.4,SC:-0.2,ER:1.3,AR:-0.4,DS:-0.4,SR:-1.0}},
+    ]},
+    { id:'shame', title:'Shame (v6.1 -- VERY HIGH tier ceiling 2.00, highest untapped weight in the 3.2b.1 catalogue, see Architecture 3.2b.1 Domain 2)', micro:[
+      {id:'shame_pick', type:'select', options:[
+        {name:'Rarely experiences shame', v:{RT:0.5,SC:-0.3,ER:-0.5,AR:-0.3,DS:0.5,SR:0.8}},
+        {name:"Occasional shame, doesn't dominate self-view", v:{RT:-0.3,SC:0.5,ER:0.8,AR:0.5,DS:-0.5,SR:-0.6}},
+        {name:'Chronic/intense shame shaping self-view and choices', v:{RT:-1.2,SC:1.2,ER:2.0,AR:1.0,DS:-1.5,SR:-2.0}},
+      ]},
+      {id:'shame_slider', type:'slider', prompt:'Shame about who I am has a powerful, lasting effect on my choices', v:{RT:-1.0,SC:1.0,ER:1.8,AR:0.9,DS:-1.3,SR:-1.8}},
+    ]},
+    { id:'core_values', title:'Core values / moral identity (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 6 -- not a protected attribute; distinct from the excluded cultural/gender-identity rows in this Domain)', micro:[
+      {id:'core_values_pick', type:'select', options:[
+        {name:'Values feel clear and rarely in conflict with choices', v:{RT:0.2,SC:-0.3,ER:-0.3,AR:-0.3,DS:0.8,SR:0.8}},
+        {name:'Values are somewhat clear, occasional conflict', v:{RT:-0.1,SC:0.2,ER:0.3,AR:0.2,DS:-0.3,SR:-0.2}},
+        {name:'Values feel unclear or frequently compromised', v:{RT:-0.4,SC:0.7,ER:0.9,AR:0.7,DS:-1.2,SR:-1.5}},
+      ]},
+      {id:'core_values_slider', type:'slider', prompt:"Acting against my core values is something I do more often than I'd like", v:{RT:-0.3,SC:0.6,ER:0.8,AR:0.6,DS:-1.1,SR:-1.4}},
+    ]},
+  ]},
+];
+
+const TOTAL_SUBS = LAYERS.reduce((a,l)=>a+l.subs.length,0); // 47 (v6.3)
+const TOTAL_MICRO = LAYERS.reduce((a,l)=>a+l.subs.reduce((b,s)=>b+s.micro.length,0),0); // 94 (v6.3)
+const ALL_SUBS = []; LAYERS.forEach(l=> l.subs.forEach(s=> ALL_SUBS.push({layerId:l.id, sub:s})));
+const MICRO_TO_SUB = {}; LAYERS.forEach(l=> l.subs.forEach(s=> s.micro.forEach(m=> MICRO_TO_SUB[m.id]=s.id)));
+
+// Tier S (Subacute) — mirrors src/core-engine.js exactly. See that file's comments for the
+// full reasoning behind the 0.06 weight and 35-day expiry.
+const SUBACUTE_WEIGHT = 0.06;
+const SUBACUTE_EXPIRY_DAYS = 35;
+const SUBACUTE_SUB_IDS = new Set(LAYERS.find(l=>l.id==='subacute').subs.map(s=>s.id));
+// subId -> ISO timestamp of when it was last answered (Guided Mode auto-stamps; Precision
+// Mode exposes a manual override so testers can exercise staleness). No entry = treated as
+// freshly answered, same "no timestamp = not stale" rule as core-engine.js.
+const subacuteAnsweredAt = {};
+
+let precisionMode = false;
+const precisionVals = {}; // subId -> {RT,SC,ER,AR,DS,SR} exact, or partial
+
+let current = 0;
+// answers[microId] = {vec} once answered
+const answers = {};
+// slider raw values for UI persistence
+const sliderVals = {};
+
+function microVec(m){
+  if(m.type==='select'){
+    const idx = answers[m.id];
+    if(idx===undefined) return null;
+    return m.options[idx].v;
+  } else {
+    const val = sliderVals[m.id];
+    if(val===undefined) return null;
+    return scaleVec(m.v, (val-3)/2);
+  }
+}
+
+function subScore(sub){
+  const pv = precisionVals[sub.id];
+  if(pv && DIMS.every(d=> pv[d.k]!==undefined && pv[d.k]!=='' && !isNaN(pv[d.k]))){
+    const out={}; DIMS.forEach(d=> out[d.k]=clamp(Number(pv[d.k]), -2, 2));
+    return out;
+  }
+  const vecs = sub.micro.map(microVec).filter(v=>v!==null);
+  if(vecs.length===0) return null;
+  const sum = zeroVec();
+  vecs.forEach(v=> DIMS.forEach(d=> sum[d.k]+=v[d.k]));
+  const out={}; DIMS.forEach(d=> out[d.k]=sum[d.k]/vecs.length);
+  return out;
+}
+
+function layerScore(layer){
+  const subVecs = layer.subs.map(subScore).filter(v=>v!==null);
+  if(subVecs.length===0) return {vec:null, answeredSubs:0};
+  const sum = zeroVec();
+  subVecs.forEach(v=> DIMS.forEach(d=> sum[d.k]+=v[d.k]));
+  const out={}; DIMS.forEach(d=> out[d.k]=sum[d.k]/subVecs.length);
+  return {vec:out, answeredSubs:subVecs.length};
+}
+
+function computeAll(){
+  const layerResults = LAYERS.map(l=>({layer:l, res:layerScore(l)}));
+
+  // Reserved-slice shrink (mirrors core-engine.js computeEngine exactly): only applied
+  // when Tier S actually has an answered sub-layer; otherwise shrink=1 and effectiveWeight
+  // === layer.weight identically, reproducing pre-Tier-S proportions exactly.
+  const subacuteResult = layerResults.find(r=>r.layer.id==='subacute');
+  const subacuteAnswered = subacuteResult && subacuteResult.res.vec !== null;
+  const shrink = subacuteAnswered ? (1-SUBACUTE_WEIGHT) : 1;
+  const effectiveWeights = {};
+  layerResults.forEach(r=>{ effectiveWeights[r.layer.id] = r.layer.id==='subacute' ? SUBACUTE_WEIGHT : r.layer.weight*shrink; });
+
+  const answeredLayers = layerResults.filter(r=>r.res.vec!==null);
+  const weightSum = answeredLayers.reduce((a,r)=>a+effectiveWeights[r.layer.id],0) || 1;
+  const finalVec = zeroVec();
+  answeredLayers.forEach(r=>{
+    const normW = effectiveWeights[r.layer.id]/weightSum;
+    DIMS.forEach(d=> finalVec[d.k]+= normW * r.res.vec[d.k]);
+  });
+  let answeredMicro=0;
+  LAYERS.forEach(l=> l.subs.forEach(s=> s.micro.forEach(m=>{ if(microVec(m)!==null) answeredMicro++; })));
+  const answeredSubs = layerResults.reduce((a,r)=>a+(r.res.answeredSubs||0),0);
+
+  // Tier S expiry (informational only -- does not affect finalVec above).
+  const staleSubacuteSubs = [...SUBACUTE_SUB_IDS].filter(subId=>{
+    const sub = ALL_SUBS.find(x=>x.sub.id===subId).sub;
+    if(subScore(sub)===null) return false; // unanswered -> not stale
+    const ts = subacuteAnsweredAt[subId];
+    if(!ts) return false; // no timestamp -> treat as freshly answered
+    const ageMs = Date.now() - new Date(ts).getTime();
+    return ageMs > SUBACUTE_EXPIRY_DAYS*24*60*60*1000;
+  });
+
+  // Primary completeness metric = answered sub-layers / total sub-layers.
+  // This is the metric validated by the automated regression suite (core-engine.js + test-cases.js,
+  // 88/88 checks passing) and stays consistent whether a sub is answered via guided micro-items
+  // or via an exact Precision Test Mode override.
+  return {
+    layerResults, finalVec, answeredMicro, answeredSubs, effectiveWeights,
+    completeness: answeredSubs/TOTAL_SUBS,
+    subacuteStale: staleSubacuteSubs.length>0, staleSubacuteSubs,
+  };
+}
+
+const LIKERT = ['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'];
+
+function renderReadout(){
+  const {layerResults, finalVec, completeness, answeredMicro, answeredSubs, subacuteStale, staleSubacuteSubs} = computeAll();
+  const maxAbs = 2;
+  const rows = document.getElementById('dimRows');
+  rows.innerHTML='';
+  DIMS.forEach(d=>{
+    const val = finalVec[d.k];
+    const pct = Math.min(50, Math.abs(val)/maxAbs*50);
+    const row=document.createElement('div');
+    row.className='dim-row';
+    row.innerHTML=`<div class="label"><span>${d.label}</span><span>${val>=0?'+':''}${val.toFixed(2)}</span></div>
+      <div class="bar-track"><div class="bar-fill ${val<0?'neg':''}" style="width:${pct}%; left:${val<0?50-pct:50}%"></div></div>`;
+    rows.appendChild(row);
+  });
+  document.getElementById('confNum').textContent = Math.round(completeness*100)+'%';
+  document.getElementById('subTotalLabel').textContent = TOTAL_SUBS;
+  const tc = document.getElementById('tierCounts');
+  const answeredLayers = layerResults.filter(r=>r.res.vec!==null).length;
+  tc.innerHTML = `
+    <div>Sub-layers: ${answeredSubs}/${TOTAL_SUBS}</div>
+    <div>Micro-indicators: ${answeredMicro}/${TOTAL_MICRO}</div>
+    <div>Layers touched: ${answeredLayers}/${LAYERS.length}</div>
+    ${subacuteStale ? `<div style="color:var(--danger);">⚠ Tier S stale: ${staleSubacuteSubs.join(', ')} (>${SUBACUTE_EXPIRY_DAYS}d old — still counted, not excluded)</div>` : ''}
+  `;
+}
+
+function renderPrecisionGrid(s){
+  const vals = precisionVals[s.id] || {};
+  const grid = `<div class="micro-label">Exact test input (-2.00 .. 2.00 per dimension)</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px 12px;">
+      ${DIMS.map(d=>`
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);margin-bottom:3px;">${d.k} — ${d.label}</div>
+          <input type="number" step="0.01" min="-2" max="2" class="precision-input" data-sub="${s.id}" data-dim="${d.k}"
+            value="${vals[d.k]!==undefined?vals[d.k]:''}" placeholder="0.00"
+            style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:7px 8px;font-family:'JetBrains Mono',monospace;font-size:12.5px;border-radius:2px;">
+        </div>`).join('')}
+    </div>`;
+  if(!SUBACUTE_SUB_IDS.has(s.id)) return grid;
+  // Tier S subs only: manual answered-at override, for exercising the staleness flag.
+  // Blank = no timestamp = treated as freshly answered (same rule as core-engine.js).
+  const currentTs = subacuteAnsweredAt[s.id] ? subacuteAnsweredAt[s.id].slice(0,10) : '';
+  return grid + `<div class="micro-label" style="margin-top:10px;">Tier S answered-at override (expires after ${SUBACUTE_EXPIRY_DAYS}d — leave blank to test as freshly answered)</div>
+    <input type="date" class="subacute-ts-input" data-sub="${s.id}" value="${currentTs}"
+      style="background:var(--bg);color:var(--text);border:1px solid var(--line);padding:7px 8px;font-family:'JetBrains Mono',monospace;font-size:12.5px;border-radius:2px;">`;
+}
+
+function renderWizard(){
+  const layer = LAYERS[current];
+  const panel = document.getElementById('wizardPanel');
+  panel.innerHTML = `
+    <div class="layer-index">LAYER ${current+1} / ${LAYERS.length}</div>
+    <h3 class="layer-title">${layer.title}</h3>
+    <div class="layer-weight">Final-blend weight: ${(layer.weight*100).toFixed(0)}% (re-normalized live)</div>
+    ${layer.subs.map(s=>`
+      <div class="sub">
+        <div class="sub-title">${s.title} <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;">[id: ${s.id}]</span></div>
+        ${precisionMode ? renderPrecisionGrid(s) : s.micro.map(m=>{
+          if(m.type==='select'){
+            return `<div class="micro-label">Micro · categorical</div>
+              <div class="options" data-micro="${m.id}">
+                ${m.options.map((o,i)=>`<div class="opt ${answers[m.id]===i?'selected':''}" data-micro="${m.id}" data-idx="${i}">${o.name}</div>`).join('')}
+              </div>`;
+          } else {
+            const val = sliderVals[m.id];
+            const touched = val!==undefined;
+            const display = touched? val : 3;
+            return `<div class="micro-label">Micro · self-report (1–5)</div>
+              <div class="slider-block">
+                <div class="slider-prompt">${m.prompt}</div>
+                <div class="slider-row">
+                  <input type="range" min="1" max="5" step="1" value="${display}" class="${touched?'touched':''}" data-micro="${m.id}">
+                  <div class="slider-val ${touched?'touched':''}" data-valfor="${m.id}">${touched? LIKERT[display-1] : 'Not yet answered'}</div>
+                </div>
+              </div>`;
+          }
+        }).join('')}
+      </div>
+    `).join('')}
+    <div class="nav">
+      <button class="navbtn" id="prevBtn" ${current===0?'disabled':''}>← Back</button>
+      <span class="progress">Layer ${current+1}/${LAYERS.length}</span>
+      <button class="navbtn next" id="nextBtn">${current===LAYERS.length-1 ? 'Generate profile →' : 'Next layer →'}</button>
+    </div>
+  `;
+  panel.querySelectorAll('.opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      answers[el.dataset.micro] = parseInt(el.dataset.idx);
+      const subId = MICRO_TO_SUB[el.dataset.micro];
+      if(SUBACUTE_SUB_IDS.has(subId)) subacuteAnsweredAt[subId] = new Date().toISOString();
+      renderWizard(); renderReadout();
+    });
+  });
+  panel.querySelectorAll('input[type=range]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const v = parseInt(el.value);
+      sliderVals[el.dataset.micro] = v;
+      el.classList.add('touched');
+      const lab = panel.querySelector(`.slider-val[data-valfor="${el.dataset.micro}"]`);
+      lab.textContent = LIKERT[v-1];
+      lab.classList.add('touched');
+      const subId = MICRO_TO_SUB[el.dataset.micro];
+      if(SUBACUTE_SUB_IDS.has(subId)) subacuteAnsweredAt[subId] = new Date().toISOString();
+      renderReadout();
+    });
+  });
+  panel.querySelectorAll('.precision-input').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const subId = el.dataset.sub, dim = el.dataset.dim;
+      precisionVals[subId] = precisionVals[subId] || {};
+      precisionVals[subId][dim] = el.value;
+      if(SUBACUTE_SUB_IDS.has(subId) && !subacuteAnsweredAt[subId]) subacuteAnsweredAt[subId] = new Date().toISOString();
+      renderReadout();
+    });
+  });
+  panel.querySelectorAll('.subacute-ts-input').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const subId = el.dataset.sub;
+      if(el.value) subacuteAnsweredAt[subId] = new Date(el.value).toISOString();
+      else delete subacuteAnsweredAt[subId];
+      renderReadout();
+    });
+  });
+  document.getElementById('prevBtn').addEventListener('click', ()=>{ if(current>0){current--; renderWizard();} });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    if(current<LAYERS.length-1){ current++; renderWizard(); }
+    else generateProfile();
+  });
+}
+
+function describe(d, dir){
+  switch(d.k){
+    case 'RT': return dir? 'seeks novelty, accepts uncertainty' : 'leans cautious, prefers predictability';
+    case 'SC': return dir? 'calibrates to group norms' : 'acts independent of group expectation';
+    case 'ER': return dir? 'heightened emotional reactivity to shifts' : 'even emotional baseline under pressure';
+    case 'AR': return dir? 'defers to authority/structure' : 'questions or resists authority';
+    case 'DS': return dir? 'independent, analytical decisions' : 'consensus-seeking, intuitive decisions';
+    case 'SR': return dir? 'strong resilience under stress' : 'reduced buffering under stress';
+  }
+}
+
+function generateProfile(){
+  document.getElementById('stage').style.display='none';
+  const {layerResults, finalVec, completeness, answeredMicro, answeredSubs, effectiveWeights, subacuteStale, staleSubacuteSubs} = computeAll();
+  const dash = document.getElementById('dashboard');
+  const sorted = DIMS.map(d=>({...d,val:finalVec[d.k]})).sort((a,b)=>Math.abs(b.val)-Math.abs(a.val));
+  const top = sorted.slice(0,3);
+  let narrative = `Weighted final blend: dominant signal is <b>${top[0].label}</b> — ${describe(top[0],top[0].val>=0)}. `;
+  narrative += `Reinforced by <b>${top[1].label}</b> (${describe(top[1],top[1].val>=0)}) and <b>${top[2].label}</b> (${describe(top[2],top[2].val>=0)}). `;
+  narrative += `Built from ${answeredSubs}/${TOTAL_SUBS} sub-layers (${answeredMicro}/${TOTAL_MICRO} micro-indicators) across ${layerResults.filter(r=>r.res.vec!==null).length}/${LAYERS.length} layers. Missing data was excluded, not zero-filled — weights re-normalized to what you actually answered.`;
+  if(subacuteStale) narrative += ` Note: Tier S data (${staleSubacuteSubs.join(', ')}) is more than ${SUBACUTE_EXPIRY_DAYS} days old — still counted in this score, but consider re-answering it.`;
+
+  const confLabel = completeness>=0.85?'High confidence':completeness>=0.6?'Moderate confidence':'Partial — low confidence';
+
+  dash.innerHTML = `
+    <div class="dash-head">
+      <h2>Final BAF Score</h2>
+      <span class="conf-tag">${confLabel} · ${Math.round(completeness*100)}% (${answeredSubs}/${TOTAL_SUBS} sub-layers)</span>
+      ${subacuteStale ? `<span class="conf-tag" style="border-color:var(--danger);color:var(--danger);">⚠ Tier S stale</span>` : ''}
+    </div>
+    <p class="dash-sub">Four-tier roll-up: micro-indicator → sub-layer average → layer average → weighted, re-normalized macro score (Tier S, when answered, reserves ${(SUBACUTE_WEIGHT*100).toFixed(0)}% undiluted — see Architecture 3.2b.2). Scale ≈ −2 to +2 per dimension. Engine validated against an 88-case automated regression suite (see companion test harness) — 88/88 passing.</p>
+    <div id="chartRows"></div>
+
+    <div class="section-label">Layer-by-layer trace</div>
+    <table class="trace">
+      <tr><th>Layer</th><th>Sub-layers touched</th><th>Weight used</th><th>Layer top signal</th></tr>
+      ${(function(){
+        const weightSum = layerResults.filter(r=>r.res.vec!==null).reduce((a,r)=>a+effectiveWeights[r.layer.id],0)||1;
+        return layerResults.map(r=>{
+          if(r.res.vec===null) return `<tr><td>${r.layer.title}</td><td class="num">0/${r.layer.subs.length}</td><td class="num">—</td><td>—</td></tr>`;
+          const normW = ((effectiveWeights[r.layer.id]/weightSum)*100).toFixed(1);
+          const topDim = DIMS.map(d=>({...d,val:r.res.vec[d.k]})).sort((a,b)=>Math.abs(b.val)-Math.abs(a.val))[0];
+          return `<tr><td>${r.layer.title}</td><td class="num">${r.res.answeredSubs}/${r.layer.subs.length}</td><td class="num">${normW}%</td><td>${topDim.label} (${topDim.val>=0?'+':''}${topDim.val.toFixed(1)})</td></tr>`;
+        }).join('');
+      })()}
+    </table>
+
+    <div class="narrative">${narrative}</div>
+
+    <div class="section-label">Exact output (full precision, for test verification)</div>
+    <pre style="background:var(--bg);border:1px solid var(--line);padding:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--teal);overflow-x:auto;border-radius:3px;">${JSON.stringify({
+      completeness: completeness,
+      finalScore: DIMS.reduce((acc,d)=>{acc[d.k]=Number(finalVec[d.k].toFixed(6)); return acc;},{}),
+      perLayer: layerResults.reduce((acc,r)=>{ if(r.res.vec!==null) acc[r.layer.id]=DIMS.reduce((a2,d)=>{a2[d.k]=Number(r.res.vec[d.k].toFixed(6)); return a2;},{}); return acc; },{})
+    }, null, 2)}</pre>
+
+    <div class="disclaimer">Heuristic self-reflection model only — not a psychological assessment, diagnosis, or predictive instrument. No physiognomic, demographic, or criminal-behavior inputs anywhere in this engine. Finer-grained scoring improves traceability and resolution; it does not make human behavior deterministic or remove real-world uncertainty.</div>
+    <button class="restart" id="restartBtn">↻ Restart</button>
+  `;
+  const chart = document.getElementById('chartRows');
+  DIMS.forEach(d=>{
+    const val = finalVec[d.k];
+    const pct = Math.min(50, Math.abs(val)/2*50);
+    const row = document.createElement('div');
+    row.className='chart-row';
+    row.innerHTML = `<div class="label">${d.label}</div>
+      <div class="track"><div class="fill ${val<0?'neg':''}" style="width:${pct}%; left:${val<0?50-pct:50}%"></div></div>
+      <div class="val">${val>=0?'+':''}${val.toFixed(2)}</div>`;
+    chart.appendChild(row);
+  });
+  dash.classList.add('show');
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    Object.keys(answers).forEach(k=>delete answers[k]);
+    Object.keys(sliderVals).forEach(k=>delete sliderVals[k]);
+    Object.keys(subacuteAnsweredAt).forEach(k=>delete subacuteAnsweredAt[k]);
+    current=0;
+    dash.classList.remove('show');
+    document.getElementById('stage').style.display='';
+    renderWizard(); renderReadout();
+    document.getElementById('stage').scrollIntoView({behavior:'smooth'});
+  });
+}
+
+document.getElementById('idList').textContent = ALL_SUBS.map(x=>x.sub.id).join(' · ');
+
+document.getElementById('precisionToggle').addEventListener('click', ()=>{
+  precisionMode = !precisionMode;
+  document.getElementById('precisionToggle').textContent = precisionMode ? 'Switch to Guided Mode' : 'Switch to Precision Test Mode';
+  document.getElementById('testConsole').style.display = precisionMode ? 'block' : 'none';
+  renderWizard(); renderReadout();
+});
+
+document.getElementById('loadJsonBtn').addEventListener('click', ()=>{
+  try{
+    const data = JSON.parse(document.getElementById('jsonInput').value);
+    const validIds = new Set(ALL_SUBS.map(x=>x.sub.id));
+    Object.keys(data).forEach(k=>{
+      if(!validIds.has(k)){ throw new Error('Unknown sub-layer id: '+k); }
+      precisionVals[k] = data[k];
+    });
+    if(!precisionMode){ precisionMode=true; document.getElementById('precisionToggle').textContent='Switch to Guided Mode'; document.getElementById('testConsole').style.display='block'; }
+    renderWizard(); renderReadout();
+    alert('Loaded '+Object.keys(data).length+' sub-layer vector(s) into the engine.');
+  }catch(e){ alert('JSON error: '+e.message); }
+});
+
+document.getElementById('exportJsonBtn').addEventListener('click', ()=>{
+  const out = {};
+  ALL_SUBS.forEach(x=>{
+    const v = precisionVals[x.sub.id];
+    if(v) out[x.sub.id] = DIMS.reduce((acc,d)=>{ if(v[d.k]!==undefined && v[d.k]!=='') acc[d.k]=Number(v[d.k]); return acc; },{});
+  });
+  document.getElementById('jsonInput').value = JSON.stringify(out, null, 2);
+});
+
+document.getElementById('clearJsonBtn').addEventListener('click', ()=>{
+  Object.keys(precisionVals).forEach(k=>delete precisionVals[k]);
+  renderWizard(); renderReadout();
+});
+
+renderWizard();
+renderReadout();
+</script>
+</body>
+</html>

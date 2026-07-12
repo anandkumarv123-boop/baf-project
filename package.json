@@ -1,0 +1,24 @@
+{
+  "name": "baf-engine-server",
+  "version": "6.0.0",
+  "description": "BAF (Behavioral Algorithm Framework) scoring engine API — implements the API surface from BAF_Technical_Architecture.docx Section 3.5",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "test": "node tests/test-cases.js && node scripts/backtest.js",
+    "backtest": "node scripts/backtest.js",
+    "golden-profiles": "node scripts/golden-profiles.js",
+    "compare-golden": "node scripts/compare-golden.js",
+    "generate-questionnaire": "node scripts/generate-questionnaire.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "pg": "^8.22.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "docx": "^9.7.1"
+  }
+}

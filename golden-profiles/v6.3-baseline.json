@@ -1,0 +1,267 @@
+{
+  "generatedAt": "2026-07-11T14:34:12.671Z",
+  "engineVersion": "v6.3",
+  "totalProfiles": 15,
+  "profiles": [
+    {
+      "id": "empty-input",
+      "description": "0% completeness — nothing answered. Boundary case: must score exactly zero.",
+      "finalVec": {
+        "RT": 0,
+        "SC": 0,
+        "ER": 0,
+        "AR": 0,
+        "DS": 0,
+        "SR": 0
+      },
+      "completeness": 0,
+      "answeredSubsTotal": 0,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "single-layer-geo-only",
+      "description": "Single-layer-only: all 3 geo subs answered, nothing else. Weight-of-one-layer renormalizes to 1.0.",
+      "finalVec": {
+        "RT": 1,
+        "SC": 1,
+        "ER": 1,
+        "AR": -0.3333333333333333,
+        "DS": 0,
+        "SR": 0.3333333333333333
+      },
+      "completeness": 0.06382978723404255,
+      "answeredSubsTotal": 3,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "single-layer-modulator-only",
+      "description": "Single-layer-only: 3 of 12 modulator subs answered (ego, stress, sleep), nothing else.",
+      "finalVec": {
+        "RT": -0.6666666666666666,
+        "SC": 0.6666666666666666,
+        "ER": 1.8333333333333333,
+        "AR": 0.6666666666666666,
+        "DS": -0.6666666666666666,
+        "SR": -1.6666666666666667
+      },
+      "completeness": 0.06382978723404255,
+      "answeredSubsTotal": 3,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "tier-s-only-grief",
+      "description": "Tier-S-only edge case: grief answered alone, everything else empty.",
+      "finalVec": {
+        "RT": -0.7,
+        "SC": 0.4,
+        "ER": 1.25,
+        "AR": 0.3,
+        "DS": -0.9,
+        "SR": -1.1
+      },
+      "completeness": 0.02127659574468085,
+      "answeredSubsTotal": 1,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "tier-s-only-both-fresh",
+      "description": "Tier-S-only edge case: both grief and life_transitions answered, fresh timestamps, nothing else.",
+      "finalVec": {
+        "RT": -0.04999999999999999,
+        "SC": 0.3,
+        "ER": 1.1,
+        "AR": 0.3,
+        "DS": -0.7,
+        "SR": -1
+      },
+      "completeness": 0.0425531914893617,
+      "answeredSubsTotal": 2,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "tier-s-stale-plus-full",
+      "description": "Tier S answered but stale (40 days old), alongside a fully-answered engine (100% completeness). Checks the stale flag stays informational-only even at full completion.",
+      "finalVec": {
+        "RT": -0.002999999999999999,
+        "SC": 0.024,
+        "ER": 0.075,
+        "AR": 0.020999999999999998,
+        "DS": -0.048,
+        "SR": -0.066
+      },
+      "completeness": 1,
+      "answeredSubsTotal": 47,
+      "totalSubs": 47,
+      "subacuteStale": true,
+      "staleSubacuteSubs": [
+        "grief",
+        "life_transitions"
+      ]
+    },
+    {
+      "id": "all-zero-full",
+      "description": "100% completeness, every sub-layer at the zero vector. Boundary case: must score exactly zero regardless of weighting.",
+      "finalVec": {
+        "RT": 0,
+        "SC": 0,
+        "ER": 0,
+        "AR": 0,
+        "DS": 0,
+        "SR": 0
+      },
+      "completeness": 1,
+      "answeredSubsTotal": 47,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "all-max-full",
+      "description": "100% completeness, every sub-layer at +2 on every dimension. Boundary case: must score exactly +2 on every dimension.",
+      "finalVec": {
+        "RT": 2,
+        "SC": 2,
+        "ER": 2,
+        "AR": 2,
+        "DS": 2,
+        "SR": 2
+      },
+      "completeness": 1,
+      "answeredSubsTotal": 47,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "sparse-20pct-risk-averse",
+      "description": "~20% completeness (9/47 subs), a cautious/risk-averse persona spread across geo, bio, econ.",
+      "finalVec": {
+        "RT": -0.6262411347517731,
+        "SC": 0.34113475177304964,
+        "ER": 0.5638297872340426,
+        "AR": 0.47801418439716314,
+        "DS": -0.5624113475177306,
+        "SR": -0.6379432624113476
+      },
+      "completeness": 0.19148936170212766,
+      "answeredSubsTotal": 9,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "sparse-20pct-high-scarcity-ego-threat",
+      "description": "~20% completeness (10/47 subs), a \"financial scarcity + fragile ego\" persona spread across econ, modulator, family.",
+      "finalVec": {
+        "RT": -0.7668128072273149,
+        "SC": 0.6641291351135911,
+        "ER": 1.5300518134715024,
+        "AR": 0.6284442673043709,
+        "DS": -1.059851202338249,
+        "SR": -1.5508303440945927
+      },
+      "completeness": 0.2127659574468085,
+      "answeredSubsTotal": 10,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "balanced-50pct-resilient-professional",
+      "description": "~50% completeness (24/47 subs), a \"resilient, analytical professional\" persona across most layers, Tier S untouched.",
+      "finalVec": {
+        "RT": 0.4320833333333334,
+        "SC": -0.11241666666666668,
+        "ER": -0.58375,
+        "AR": -0.28733333333333333,
+        "DS": 0.7891666666666666,
+        "SR": 0.81575
+      },
+      "completeness": 0.5106382978723404,
+      "answeredSubsTotal": 24,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "balanced-40pct-anxious-depleted",
+      "description": "~40% completeness (19/47 subs), an \"anxious, depleted\" persona weighted toward modulator/family negatives, includes stale Tier S.",
+      "finalVec": {
+        "RT": -0.6623294679399725,
+        "SC": 0.4392735334242837,
+        "ER": 1.2752472714870393,
+        "AR": 0.4755286493860845,
+        "DS": -0.9769440654843109,
+        "SR": -1.277532401091405
+      },
+      "completeness": 0.40425531914893614,
+      "answeredSubsTotal": 19,
+      "totalSubs": 47,
+      "subacuteStale": true,
+      "staleSubacuteSubs": [
+        "grief"
+      ]
+    },
+    {
+      "id": "sparse-tier-s-plus-two-layers",
+      "description": "Tier S answered alongside only 2 of the 8 core layers (geo full, bio partial) — exercises reserved-slice math in a sparse, non-full scenario.",
+      "finalVec": {
+        "RT": 0.68760907504363,
+        "SC": 0,
+        "ER": 0,
+        "AR": 0,
+        "DS": 0,
+        "SR": 0
+      },
+      "completeness": 0.1276595744680851,
+      "answeredSubsTotal": 6,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "full-100pct-mixed-realistic",
+      "description": "100% completeness, all 47 subs answered with a realistic mixed persona (not all-zero/all-max), including fresh Tier S.",
+      "finalVec": {
+        "RT": -0.07809583333333332,
+        "SC": -0.024744999999999996,
+        "ER": 0.06247666666666667,
+        "AR": -0.016496666666666666,
+        "DS": 0.04124166666666666,
+        "SR": -0.09371499999999996
+      },
+      "completeness": 1,
+      "answeredSubsTotal": 47,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    },
+    {
+      "id": "out-of-range-clamp-check",
+      "description": "Deliberately out-of-range raw inputs (beyond +/-2) across a handful of subs, to confirm clamping stays exact across engine revisions.",
+      "finalVec": {
+        "RT": 0.6046511627906976,
+        "SC": -0.6046511627906976,
+        "ER": 1.5348837209302322,
+        "AR": -1.5348837209302322,
+        "DS": 1.5348837209302322,
+        "SR": -1.5348837209302322
+      },
+      "completeness": 0.06382978723404255,
+      "answeredSubsTotal": 3,
+      "totalSubs": 47,
+      "subacuteStale": false,
+      "staleSubacuteSubs": []
+    }
+  ]
+}
