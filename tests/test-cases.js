@@ -143,6 +143,7 @@ const CEILINGS = {
   attachment_style: 1.50, past_failures: 1.50,                 // Domain 7
   cognitive_style: 1.50,                                       // Domain 8
   ace: 1.50,                                                   // Domain 7 (v6.3)
+  loneliness: 1.25,                                            // Domain 2 (v6.5)
 };
 {
   const fs = require('fs');
@@ -563,6 +564,16 @@ const CEILINGS = {
     }
     results.push({ name: 'TC52 consistency-check: unknown scenario id rejected', pass, diffs: pass ? [] : [diff] });
   }
+}
+
+// TC53 (v6.5) — loneliness / social isolation (Cacioppo & Patrick 2008), social layer,
+// ceiling 1.25. Confidence-multiplier not applied (no single quantifiable behavioral
+// effect size, same evidence category as cognitive_style) -- closes the one clean gap
+// found in the v6.5 catalogue audit (Architecture 3.2b.1 Domain 2 / 3.2b.6).
+{
+  const r = computeEngine({precisionVectors:{ loneliness:{RT:-0.4,SC:0.5,ER:1.25,AR:0.4,DS:-0.6,SR:-1.1} }});
+  check('TC53 (v6.5) loneliness sub passthrough', r.finalVec, {RT:-0.4,SC:0.5,ER:1.25,AR:0.4,DS:-0.6,SR:-1.1});
+  check('TC53b completeness = 1/T', {c:r.completeness}, {c:1/TOTAL});
 }
 
 // ---- report ----

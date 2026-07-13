@@ -65,6 +65,11 @@ const SUB_TO_LAYER = {
   collectivism:'culture', tradition:'culture',
   density_net:'social', digital_ratio:'social',
   social_comparison:'social', relationship_conflict:'social', social_exclusion:'social',
+  // v6.5: loneliness/social isolation (Cacioppo & Patrick 2008) -- closes the one clean
+  // gap identified in the v6.5 catalogue audit (Architecture 3.2b.1 Domain 2). Ceiling
+  // 1.25, no confidence-multiplier adjustment (large physiological evidence base, no
+  // single quantifiable behavioral effect size -- same category as cognitive_style).
+  loneliness:'social',
   current_stability:'econ', formative_scarcity:'econ',
   time_pressure:'econ',
   education:'cognitive', schema_flex:'cognitive',

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BAF v6.3 — Confidence-Corrected: 47 Sub-Layers + Tier S, Verified Citations, Precision Mode</title>
+<title>BAF v6.5 — Confidence-Corrected: 48 Sub-Layers + Tier S, Verified Citations, Precision Mode</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
@@ -101,10 +101,10 @@ table.trace td.num{font-family:'JetBrains Mono',monospace;color:var(--muted);}
   <div class="hero">
     <div class="eyebrow">BAF v6.3 · Confidence-Corrected Engine — adds a dedicated Childhood Adversity (ACEs) sub-layer, one of the best-replicated effects in the Architecture doc's evidence catalogue</div>
     <h1>Micro-indicators feed sub-layers. Sub-layers feed layers (and now Tier S). Layers feed the macro score.</h1>
-    <p>Every sub-layer carries two micro-indicators: one categorical fact, one continuous 5-point self-report statement. That's 94 individually-tracked data points across 47 sub-layers — finer resolution, fully traceable top to bottom.</p>
+    <p>Every sub-layer carries two micro-indicators: one categorical fact, one continuous 5-point self-report statement. That's 96 individually-tracked data points across 48 sub-layers — finer resolution, fully traceable top to bottom.</p>
     <div class="tiers">
-      <span>TIER 0 · <b>94 micro-indicators</b></span>
-      <span>TIER 1 · <b>47 sub-layers</b></span>
+      <span>TIER 0 · <b>96 micro-indicators</b></span>
+      <span>TIER 1 · <b>48 sub-layers</b></span>
       <span>TIER 2 · <b>8 layers + Tier S</b></span>
       <span>TIER 3 · <b>1 macro score</b></span>
     </div>
@@ -351,6 +351,14 @@ const LAYERS = [
       ]},
       {id:'social_exclusion_slider', type:'slider', prompt:"Being excluded or rejected by others affects me more intensely than I'd expect", v:{RT:-0.4,SC:0.5,ER:1.3,AR:0.4,DS:-0.6,SR:-1.1}},
     ]},
+    { id:'loneliness', title:'Loneliness / social isolation (v6.5 -- MODERATE-HIGH tier ceiling 1.25, Cacioppo & Patrick 2008; no confidence-multiplier adjustment -- large physiological/health-mechanism evidence base (cortisol, IL-6 inflammation, HPA-axis, cognitive decline) but no single quantifiable behavioral effect size analogous to Milgram/Asch, see Architecture 3.2b.1 Domain 2 / 3.2b.6. SC direction: positive -- follows the established Domain 4 pattern (social_comparison/social_exclusion above), where heightened social-threat salience raises social-calibration/hypervigilance rather than lowering it; read as conformity-seeking-under-isolation, not reduced social attunement', micro:[
+      {id:'loneliness_pick', type:'select', options:[
+        {name:'Rarely feels lonely / feels socially connected', v:{RT:0.2,SC:-0.2,ER:-0.2,AR:-0.1,DS:0.3,SR:0.4}},
+        {name:'Occasional feelings of loneliness', v:{RT:-0.2,SC:0.3,ER:0.5,AR:0.2,DS:-0.3,SR:-0.4}},
+        {name:'Persistent, significant loneliness / social isolation', v:{RT:-0.4,SC:0.5,ER:1.25,AR:0.4,DS:-0.6,SR:-1.1}},
+      ]},
+      {id:'loneliness_slider', type:'slider', prompt:'I feel isolated or disconnected from others, even when people are around', v:{RT:-0.3,SC:0.4,ER:1.0,AR:0.3,DS:-0.5,SR:-0.9}},
+    ]},
   ]},
   { id:'econ', title:'Layer 6 — Economic Conditions', weight:0.14, subs:[
     { id:'current_stability', title:'Current economic stability', micro:[
@@ -571,8 +579,8 @@ const LAYERS = [
   ]},
 ];
 
-const TOTAL_SUBS = LAYERS.reduce((a,l)=>a+l.subs.length,0); // 47 (v6.3)
-const TOTAL_MICRO = LAYERS.reduce((a,l)=>a+l.subs.reduce((b,s)=>b+s.micro.length,0),0); // 94 (v6.3)
+const TOTAL_SUBS = LAYERS.reduce((a,l)=>a+l.subs.length,0); // 48 (v6.5)
+const TOTAL_MICRO = LAYERS.reduce((a,l)=>a+l.subs.reduce((b,s)=>b+s.micro.length,0),0); // 96 (v6.5)
 const ALL_SUBS = []; LAYERS.forEach(l=> l.subs.forEach(s=> ALL_SUBS.push({layerId:l.id, sub:s})));
 const MICRO_TO_SUB = {}; LAYERS.forEach(l=> l.subs.forEach(s=> s.micro.forEach(m=> MICRO_TO_SUB[m.id]=s.id)));
 
@@ -665,7 +673,7 @@ function computeAll(){
 
   // Primary completeness metric = answered sub-layers / total sub-layers.
   // This is the metric validated by the automated regression suite (core-engine.js + test-cases.js,
-  // 88/88 checks passing) and stays consistent whether a sub is answered via guided micro-items
+  // 95/95 checks passing) and stays consistent whether a sub is answered via guided micro-items
   // or via an exact Precision Test Mode override.
   return {
     layerResults, finalVec, answeredMicro, answeredSubs, effectiveWeights,
@@ -836,7 +844,7 @@ function generateProfile(){
       <span class="conf-tag">${confLabel} · ${Math.round(completeness*100)}% (${answeredSubs}/${TOTAL_SUBS} sub-layers)</span>
       ${subacuteStale ? `<span class="conf-tag" style="border-color:var(--danger);color:var(--danger);">⚠ Tier S stale</span>` : ''}
     </div>
-    <p class="dash-sub">Four-tier roll-up: micro-indicator → sub-layer average → layer average → weighted, re-normalized macro score (Tier S, when answered, reserves ${(SUBACUTE_WEIGHT*100).toFixed(0)}% undiluted — see Architecture 3.2b.2). Scale ≈ −2 to +2 per dimension. Engine validated against an 88-case automated regression suite (see companion test harness) — 88/88 passing.</p>
+    <p class="dash-sub">Four-tier roll-up: micro-indicator → sub-layer average → layer average → weighted, re-normalized macro score (Tier S, when answered, reserves ${(SUBACUTE_WEIGHT*100).toFixed(0)}% undiluted — see Architecture 3.2b.2). Scale ≈ −2 to +2 per dimension. Engine validated against a 95-case automated regression suite (see companion test harness) — 95/95 passing.</p>
     <div id="chartRows"></div>
 
     <div class="section-label">Layer-by-layer trace</div>
