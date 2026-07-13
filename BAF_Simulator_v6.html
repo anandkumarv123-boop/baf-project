@@ -673,7 +673,7 @@ function computeAll(){
 
   // Primary completeness metric = answered sub-layers / total sub-layers.
   // This is the metric validated by the automated regression suite (core-engine.js + test-cases.js,
-  // 100/100 checks passing) and stays consistent whether a sub is answered via guided micro-items
+  // 103/103 checks passing) and stays consistent whether a sub is answered via guided micro-items
   // or via an exact Precision Test Mode override.
   return {
     layerResults, finalVec, answeredMicro, answeredSubs, effectiveWeights,
@@ -844,7 +844,7 @@ function generateProfile(){
       <span class="conf-tag">${confLabel} · ${Math.round(completeness*100)}% (${answeredSubs}/${TOTAL_SUBS} sub-layers)</span>
       ${subacuteStale ? `<span class="conf-tag" style="border-color:var(--danger);color:var(--danger);">⚠ Tier S stale</span>` : ''}
     </div>
-    <p class="dash-sub">Four-tier roll-up: micro-indicator → sub-layer average → layer average → weighted, re-normalized macro score (Tier S, when answered, reserves ${(SUBACUTE_WEIGHT*100).toFixed(0)}% undiluted — see Architecture 3.2b.2). Scale ≈ −2 to +2 per dimension. Engine validated against a 100-case automated regression suite (see companion test harness) — 100/100 passing.</p>
+    <p class="dash-sub">Four-tier roll-up: micro-indicator → sub-layer average → layer average → weighted, re-normalized macro score (Tier S, when answered, reserves ${(SUBACUTE_WEIGHT*100).toFixed(0)}% undiluted — see Architecture 3.2b.2). Scale ≈ −2 to +2 per dimension. Engine validated against a 103-case automated regression suite (see companion test harness) — 103/103 passing.</p>
     <div id="chartRows"></div>
 
     <div class="section-label">Layer-by-layer trace</div>

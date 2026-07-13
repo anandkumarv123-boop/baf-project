@@ -147,6 +147,57 @@ function layerRollupVectors(subIds, subScores) {
   return vectors;
 }
 
+// Cross-layer correlation dampener (v6.7) -- generalizes the same-layer dampener above to
+// pairs that live in two DIFFERENT roll-up layers, where there is no shared layer-average
+// to fold two subs into (see CORRELATED_PAIRS: that mechanism requires both members to be
+// candidates in the same average). emotional_trauma (modulator) and stability (family) are
+// exactly this case: flagged correlated since v6.1, left undampened through v6.6 because
+// forcing the same-layer fold onto a cross-layer pair doesn't mean anything structurally.
+//
+// Mechanism: when BOTH members of a listed pair are answered, each member's OWN vector is
+// scaled by CROSS_LAYER_DISCOUNT before it enters ITS OWN layer's average -- not folded
+// into a shared slot (there isn't one to fold into), just discounted in place, in its own
+// layer, alongside whatever else that layer has. Each layer still averages over the same
+// number of slots as before; only the discounted member's magnitude changes. If only one
+// member is answered, nothing changes -- it contributes at full, undampened weight, same
+// guarantee as CORRELATED_PAIRS.
+//
+// CROSS_LAYER_DISCOUNT = 0.5, chosen to match what the same-layer fix already does to each
+// member of ITS pair: folding two same-layer subs into one averaged slot means each
+// member's own vector counts at exactly 50% within that slot (a straight 2-way average) --
+// see layerRollupVectors above. There is no independent citation quantifying how
+// correlated emotional_trauma and stability actually are (unlike the fact-checked
+// citations in 3.2b.4, which had real effect sizes to ground a specific ceiling number);
+// absent that, 0.5 is the neutral, symmetric prior -- no directional reason exists to
+// discount one member more than the other, or by more or less than half. This mirrors the
+// project's established pattern of choosing a conservative, principled default absent hard
+// data (SUBACUTE_WEIGHT was set below the smallest layer weight for the same reason).
+//
+// Deliberately a list + one shared constant, not hardcoded to this one pair: more
+// cross-layer overlaps may be found later (a future audit), and each would only need an
+// entry appended here, not a new mechanism.
+const CROSS_LAYER_DISCOUNT = 0.5;
+const CROSS_LAYER_PAIRS = [
+  ['emotional_trauma', 'stability'],
+];
+
+// Returns a copy of subScores with CROSS_LAYER_PAIRS applied: for each pair where BOTH
+// members are answered, both entries are replaced with their discounted vector. Every
+// other entry (including a pair with only one member answered) passes through unchanged.
+// The input subScores map itself is never mutated -- computeEngine's returned subScores
+// stays the raw, undiscounted, per-sub answered value (same principle as
+// layerAnsweredSubs staying undiscounted for completeness); only this derived copy, used
+// to build layer averages, is discounted.
+function applyCrossLayerDampener(subScores) {
+  const out = { ...subScores };
+  CROSS_LAYER_PAIRS.forEach(([a, b]) => {
+    if (subScores[a] === null || subScores[b] === null) return; // needs both answered
+    out[a] = scaleVec(subScores[a], CROSS_LAYER_DISCOUNT);
+    out[b] = scaleVec(subScores[b], CROSS_LAYER_DISCOUNT);
+  });
+  return out;
+}
+
 // subScore: given a precision vector (exact, all 6 dims) OR a set of micro vectors, average them.
 // For the regression harness we test two input shapes:
 //   1. precisionVectors: { subId: {RT,SC,ER,AR,DS,SR} }  -- exact override, full precision
@@ -173,17 +224,22 @@ function computeEngine({precisionVectors={}, microVectors={}, subacuteTimestamps
   const subScores = {};
   ALL_SUB_IDS.forEach(id => { subScores[id] = subScoreFrom(precisionVectors, microVectors, id); });
 
+  // Cross-layer discounting happens once, up front, on a derived copy -- raw subScores
+  // (returned below, and used for layerAnsweredSubs/completeness) is never touched.
+  const rollupSubScores = applyCrossLayerDampener(subScores);
+
   const layerVecs = {};
   const layerAnsweredSubs = {};
   ALL_LAYER_IDS.forEach(layerId=>{
     const subIds = ALL_SUB_IDS.filter(id=>SUB_TO_LAYER[id]===layerId);
     const answered = subIds.map(id=>subScores[id]).filter(v=>v!==null);
     // layerAnsweredSubs counts raw answered sub-layers (feeds completeness below) -- this
-    // is a data-completeness metric, deliberately untouched by the correlation dampener,
-    // which only changes how layerVecs is computed, not how many subs were answered.
+    // is a data-completeness metric, deliberately untouched by either correlation
+    // dampener, which only changes how layerVecs is computed, not how many subs were
+    // answered.
     layerAnsweredSubs[layerId] = answered.length;
     if(answered.length===0){ layerVecs[layerId] = null; return; }
-    const rollupVectors = layerRollupVectors(subIds, subScores);
+    const rollupVectors = layerRollupVectors(subIds, rollupSubScores);
     const sum = zeroVec();
     rollupVectors.forEach(v=> DIMS.forEach(k=> sum[k]+=v[k]));
     const out={}; DIMS.forEach(k=> out[k]=sum[k]/rollupVectors.length);
@@ -232,5 +288,5 @@ function computeEngine({precisionVectors={}, microVectors={}, subacuteTimestamps
 module.exports = {
   DIMS, zeroVec, scaleVec, LAYER_WEIGHTS, SUB_TO_LAYER, ALL_SUB_IDS, ALL_LAYER_IDS,
   LAYER_SUB_COUNT, SUBACUTE_WEIGHT, SUBACUTE_EXPIRY_DAYS, CORRELATED_PAIRS,
-  subScoreFrom, computeEngine,
+  CROSS_LAYER_PAIRS, CROSS_LAYER_DISCOUNT, subScoreFrom, computeEngine,
 };

@@ -1,6 +1,9 @@
-const { computeEngine, LAYER_WEIGHTS, ALL_SUB_IDS, SUBACUTE_WEIGHT, SUBACUTE_EXPIRY_DAYS } = require('./core-engine');
+const {
+  computeEngine, LAYER_WEIGHTS, ALL_SUB_IDS, SUBACUTE_WEIGHT, SUBACUTE_EXPIRY_DAYS,
+  DIMS, CROSS_LAYER_DISCOUNT,
+} = require('./core-engine');
 
-const TOTAL = ALL_SUB_IDS.length; // now 47 as of v6.3 (was 46 pre-v6.3, 22 pre-v6.1, 20 pre-v6)
+const TOTAL = ALL_SUB_IDS.length; // 48 as of v6.5 (47 v6.3, 46 pre-v6.3, 22 pre-v6.1, 20 pre-v6)
 const TOL = 0.001;
 const results = [];
 
@@ -62,12 +65,38 @@ function check(name, actual, expected, meta){
   check('TC5b completeness = 1.0', {c:r.completeness}, {c:1.0});
 }
 
-// TC6 — every sub-layer at max (+2 all dims) -> weighted avg of identical vectors = same vector exactly
+// TC6 — every sub-layer at max (+2 all dims). Through v6.6 this was "weighted avg of
+// identical vectors = same vector exactly", a trivial invariant since every input really
+// was identical. v6.7's cross-layer dampener deliberately breaks that triviality:
+// emotional_trauma and stability are discounted to 1 (CROSS_LAYER_DISCOUNT x 2) while
+// every OTHER sub in their respective layers stays at 2, so modulator's and family's own
+// averages are no longer exactly 2 -- and neither is the final blend. Expected value is
+// derived from the same constants the engine uses (not a hand-rounded magic number), so
+// this stays re-derivable if any of those constants ever change.
 {
   const pv = {};
   require('./core-engine').ALL_SUB_IDS.forEach(id=> pv[id]={RT:2,SC:2,ER:2,AR:2,DS:2,SR:2});
   const r = computeEngine({precisionVectors:pv});
-  check('TC6 all-max full run -> max vector preserved exactly', r.finalVec, {RT:2,SC:2,ER:2,AR:2,DS:2,SR:2});
+
+  const shrink = 1 - SUBACUTE_WEIGHT;
+  // family: attachment_style+parenting fold to one slot (both at 2, folds to 2); stability
+  // discounted to 2*CROSS_LAYER_DISCOUNT; birthorder, past_failures, ace stay at 2 -- 5 slots total.
+  const familyVec = (2 + 2*CROSS_LAYER_DISCOUNT + 2 + 2 + 2) / 5;
+  // modulator: 12 subs, 11 stay at 2, emotional_trauma discounted to 2*CROSS_LAYER_DISCOUNT.
+  const modulatorVec = (11*2 + 2*CROSS_LAYER_DISCOUNT) / 12;
+  // every other layer (geo, bio, culture, social, econ, cognitive, subacute) is untouched by
+  // either dampener -- still uniformly 2, since every one of their subs is answered at 2.
+  const effWeights = {};
+  Object.keys(LAYER_WEIGHTS).forEach(l => { effWeights[l] = LAYER_WEIGHTS[l] * shrink; });
+  effWeights.subacute = SUBACUTE_WEIGHT; // grief + life_transitions both answered at 2
+  const layerVecOf = l => l === 'family' ? familyVec : l === 'modulator' ? modulatorVec : 2;
+  const weightSum = Object.values(effWeights).reduce((a, b) => a + b, 0);
+  let expectedVal = 0;
+  Object.keys(effWeights).forEach(l => { expectedVal += effWeights[l] * layerVecOf(l); });
+  expectedVal /= weightSum;
+
+  const expected = {}; DIMS.forEach(k => { expected[k] = expectedVal; });
+  check('TC6 (v6.7) all-max full run -> no longer trivially uniform (cross-layer dampener discounts 2 of 48 subs)', r.finalVec, expected);
 }
 
 // TC7 — single sub answered inside modulator (highest-weight layer), verify passthrough regardless of weight size
@@ -626,19 +655,74 @@ const CEILINGS = {
   check('TC56 (v6.5) dampener: parenting alone (no attachment_style) -> unaffected, full weight', r.finalVec, expected);
 }
 
-// TC57 — both emotional_trauma and stability answered -> deliberately NOT dampened (see
-// core-engine.js's CORRELATED_PAIRS comment: they're a cross-layer overlap -- modulator
-// and family respectively -- with no shared layer-average step to fold into). Confirms
-// finalVec still matches the plain weighted-layer-blend formula with no special-casing.
+// TC57 (v6.7) — both emotional_trauma and stability answered -> the cross-layer dampener
+// now DOES fire (superseding the v6.5 test that asserted no dampening -- that guarantee no
+// longer holds, by design, as of v6.7). See core-engine.js's CROSS_LAYER_PAIRS/
+// CROSS_LAYER_DISCOUNT comments for the full design reasoning.
 {
   const emotional_trauma = {RT:-0.6,SC:0.3,ER:1.5,AR:0.4,DS:-0.8,SR:-1.3};
   const stability = {RT:1,SC:1,ER:1,AR:1,DS:1,SR:1};
   const r = computeEngine({precisionVectors:{ emotional_trauma, stability }});
-  // modulator (weight 0.15) = emotional_trauma exactly (only modulator sub answered)
-  // family (weight 0.18) = stability exactly (only family sub answered)
-  // finalVec = (0.15*emotional_trauma + 0.18*stability) / 0.33 -- plain two-layer blend
-  const expected = {RT:0.272727, SC:0.681818, ER:1.227273, AR:0.727273, DS:0.181818, SR:-0.045455};
-  check('TC57 (v6.5) emotional_trauma+stability both answered -> cross-layer, no dampening applied (by design)', r.finalVec, expected);
+  // modulator (weight 0.15) = discounted emotional_trauma exactly (only modulator sub answered)
+  // family (weight 0.18) = discounted stability exactly (only family sub answered)
+  // finalVec = (0.15*(CROSS_LAYER_DISCOUNT*emotional_trauma) + 0.18*(CROSS_LAYER_DISCOUNT*stability)) / 0.33
+  const expected = {};
+  DIMS.forEach(k => {
+    expected[k] = (LAYER_WEIGHTS.modulator*CROSS_LAYER_DISCOUNT*emotional_trauma[k] + LAYER_WEIGHTS.family*CROSS_LAYER_DISCOUNT*stability[k])
+      / (LAYER_WEIGHTS.modulator + LAYER_WEIGHTS.family);
+  });
+  check('TC57 (v6.7) emotional_trauma+stability both answered -> cross-layer dampener fires, each scaled by CROSS_LAYER_DISCOUNT', r.finalVec, expected);
+}
+
+// TC58 (v6.7) — only emotional_trauma answered (stability untouched) -> NOT part of any
+// discount (dampener requires BOTH members), full weight, identical to the pre-v6.7
+// passthrough (see TC21).
+{
+  const emotional_trauma = {RT:-0.6,SC:0.3,ER:1.5,AR:0.4,DS:-0.8,SR:-1.3};
+  const r = computeEngine({precisionVectors:{ emotional_trauma }});
+  check('TC58 (v6.7) cross-layer dampener: emotional_trauma alone (no stability) -> unaffected, full weight', r.finalVec, emotional_trauma);
+}
+
+// TC59 (v6.7) — only stability answered (emotional_trauma untouched) -> same guarantee, mirrored.
+{
+  const stability = {RT:1,SC:1,ER:1,AR:1,DS:1,SR:1};
+  const r = computeEngine({precisionVectors:{ stability }});
+  check('TC59 (v6.7) cross-layer dampener: stability alone (no emotional_trauma) -> unaffected, full weight', r.finalVec, stability);
+}
+
+// TC60 (v6.7) — interaction check: the cross-layer dampener (emotional_trauma/stability),
+// the same-layer dampener (attachment_style/parenting), and Tier S's reserved-slice math
+// all active in the same computeEngine() call, to confirm they compose correctly rather
+// than only being verified in isolation.
+{
+  const emotional_trauma = {RT:-0.6,SC:0.3,ER:1.5,AR:0.4,DS:-0.8,SR:-1.3};
+  const stability = {RT:1,SC:1,ER:1,AR:1,DS:1,SR:1};
+  const attachment_style = {RT:-0.5,SC:0.8,ER:1.3,AR:0.5,DS:-0.9,SR:-1.2};
+  const parenting = {RT:0.5,SC:-0.4,ER:-0.3,AR:-0.5,DS:0.7,SR:0.4};
+  const birthorder = {RT:1.0,SC:1.0,ER:1.0,AR:1.0,DS:1.0,SR:1.0};
+  const grief = {RT:-0.7,SC:0.4,ER:1.25,AR:0.3,DS:-0.9,SR:-1.1};
+
+  const r = computeEngine({precisionVectors:{
+    emotional_trauma, stability, attachment_style, parenting, birthorder, grief,
+  }});
+
+  // modulator: only emotional_trauma answered -> discounted, alone in its layer's average.
+  const modulatorVec = {}; DIMS.forEach(k => { modulatorVec[k] = emotional_trauma[k]*CROSS_LAYER_DISCOUNT; });
+  // family: attachment_style+parenting fold to one same-layer-dampened slot; stability is
+  // cross-layer-discounted; birthorder is untouched by either -- 3 slots total.
+  const combinedPair = {}; DIMS.forEach(k => { combinedPair[k] = (attachment_style[k]+parenting[k])/2; });
+  const stabilityDiscounted = {}; DIMS.forEach(k => { stabilityDiscounted[k] = stability[k]*CROSS_LAYER_DISCOUNT; });
+  const familyVec = {}; DIMS.forEach(k => { familyVec[k] = (combinedPair[k]+stabilityDiscounted[k]+birthorder[k])/3; });
+  // subacute: only grief answered -> passthrough, untouched by either dampener.
+  const subacuteVec = grief;
+
+  const shrink = 1 - SUBACUTE_WEIGHT;
+  const wMod = LAYER_WEIGHTS.modulator*shrink, wFam = LAYER_WEIGHTS.family*shrink, wSub = SUBACUTE_WEIGHT;
+  const weightSum = wMod + wFam + wSub;
+  const expected = {};
+  DIMS.forEach(k => { expected[k] = (wMod*modulatorVec[k] + wFam*familyVec[k] + wSub*subacuteVec[k]) / weightSum; });
+
+  check('TC60 (v6.7) cross-layer dampener + same-layer dampener + Tier S reserved-slice all compose correctly in one call', r.finalVec, expected);
 }
 
 // ---- report ----
