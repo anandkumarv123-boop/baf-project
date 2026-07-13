@@ -91,6 +91,62 @@ ALL_SUB_IDS.forEach(id => { const l = SUB_TO_LAYER[id]; LAYER_SUB_COUNT[l] = (LA
 // deliberately absent from LAYER_WEIGHTS (see SUBACUTE_WEIGHT comment above).
 const ALL_LAYER_IDS = [...Object.keys(LAYER_WEIGHTS), 'subacute'];
 
+// Correlation dampener (v6.5) -- load-bearing design decision, documented at the same
+// level of detail as SUBACUTE_WEIGHT/SUBACUTE_EXPIRY_DAYS above.
+//
+// Problem: a layer's score is the simple arithmetic mean of its answered subs (see the
+// layer roll-up loop in computeEngine below). That formula silently assumes every
+// answered sub in a layer is an independent signal. Two same-layer pairs are flagged
+// (in their titles and in Architecture 3.2b.1) as knowingly NOT independent -- they were
+// added as separate sub-layers per the doc's own "don't silently merge correlated
+// signals" recommendation, but that leaves them counted as two full, independent slots
+// in their shared layer's average. When both members of such a pair are answered, the
+// correlated construct they both partially measure ends up occupying 2 of that layer's N
+// slots instead of 1 -- effectively double-weighted relative to every other sub-layer in
+// the same layer, which only ever contributes one slot no matter how it correlates with
+// sub-layers in OTHER layers.
+//
+// Fix: when both members of a listed pair are answered, they are folded into a single
+// combined vector -- the average of the two -- before the layer average is computed, so
+// the pair occupies exactly one slot in that average, same as any uncorrelated sub. This
+// does not touch the layer-averaging formula itself (still a plain mean); it only changes
+// what goes into it. If only one member is answered, nothing changes -- that member is
+// not part of any pair-fold and contributes at full, undampened weight, same as before.
+//
+// Scope, deliberately narrow: only 'attachment_style'/'parenting' (both 'family', per
+// SUB_TO_LAYER above) is listed here. 'emotional_trauma' ('modulator') and 'stability'
+// ('family') are ALSO a knowingly-flagged overlap pair, but they sit in two different
+// layers with two independently-weighted layer averages -- there is no shared "layer
+// average" step to fold them into, so this same mechanism cannot mechanically apply to
+// them. Their overlap remains a documented risk only (see their titles and Architecture
+// 3.2b.1), not a scoring change; a real fix for a cross-layer correlated pair would need
+// its own design, comparable in scope to Tier S above, not a reuse of this one.
+const CORRELATED_PAIRS = [
+  ['attachment_style', 'parenting'],
+];
+
+// Given a layer's sub ids and the full subScores map, returns the list of vectors to feed
+// into that layer's average -- with any CORRELATED_PAIRS member folded per the dampener
+// above when (and only when) both members of the pair are answered and both belong to
+// this layer.
+function layerRollupVectors(subIds, subScores) {
+  const folded = new Set();
+  const vectors = [];
+  CORRELATED_PAIRS.forEach(([a, b]) => {
+    if (!subIds.includes(a) || !subIds.includes(b)) return; // pair not both in this layer
+    if (subScores[a] === null || subScores[b] === null) return; // dampener needs both answered
+    const combined = {};
+    DIMS.forEach(k => { combined[k] = (subScores[a][k] + subScores[b][k]) / 2; });
+    vectors.push(combined);
+    folded.add(a); folded.add(b);
+  });
+  subIds.forEach(id => {
+    if (folded.has(id)) return; // already contributed via its pair's combined vector above
+    if (subScores[id] !== null) vectors.push(subScores[id]);
+  });
+  return vectors;
+}
+
 // subScore: given a precision vector (exact, all 6 dims) OR a set of micro vectors, average them.
 // For the regression harness we test two input shapes:
 //   1. precisionVectors: { subId: {RT,SC,ER,AR,DS,SR} }  -- exact override, full precision
@@ -122,11 +178,15 @@ function computeEngine({precisionVectors={}, microVectors={}, subacuteTimestamps
   ALL_LAYER_IDS.forEach(layerId=>{
     const subIds = ALL_SUB_IDS.filter(id=>SUB_TO_LAYER[id]===layerId);
     const answered = subIds.map(id=>subScores[id]).filter(v=>v!==null);
+    // layerAnsweredSubs counts raw answered sub-layers (feeds completeness below) -- this
+    // is a data-completeness metric, deliberately untouched by the correlation dampener,
+    // which only changes how layerVecs is computed, not how many subs were answered.
     layerAnsweredSubs[layerId] = answered.length;
     if(answered.length===0){ layerVecs[layerId] = null; return; }
+    const rollupVectors = layerRollupVectors(subIds, subScores);
     const sum = zeroVec();
-    answered.forEach(v=> DIMS.forEach(k=> sum[k]+=v[k]));
-    const out={}; DIMS.forEach(k=> out[k]=sum[k]/answered.length);
+    rollupVectors.forEach(v=> DIMS.forEach(k=> sum[k]+=v[k]));
+    const out={}; DIMS.forEach(k=> out[k]=sum[k]/rollupVectors.length);
     layerVecs[layerId] = out;
   });
 
@@ -171,5 +231,6 @@ function computeEngine({precisionVectors={}, microVectors={}, subacuteTimestamps
 
 module.exports = {
   DIMS, zeroVec, scaleVec, LAYER_WEIGHTS, SUB_TO_LAYER, ALL_SUB_IDS, ALL_LAYER_IDS,
-  LAYER_SUB_COUNT, SUBACUTE_WEIGHT, SUBACUTE_EXPIRY_DAYS, subScoreFrom, computeEngine,
+  LAYER_SUB_COUNT, SUBACUTE_WEIGHT, SUBACUTE_EXPIRY_DAYS, CORRELATED_PAIRS,
+  subScoreFrom, computeEngine,
 };

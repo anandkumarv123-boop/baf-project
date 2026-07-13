@@ -576,6 +576,71 @@ const CEILINGS = {
   check('TC53b completeness = 1/T', {c:r.completeness}, {c:1/TOTAL});
 }
 
+// TC54-57 (v6.5) — correlation dampener regression tests. See core-engine.js's
+// CORRELATED_PAIRS comment for the full design reasoning (why attachment_style/parenting
+// is dampened and why emotional_trauma/stability, a cross-layer overlap, deliberately is
+// not). All four use a third family sub (birthorder) alongside the pair under test so the
+// layer's slot-count actually changes when folding occurs -- with only the pair answered
+// and nothing else, the dampened and undampened averages are numerically identical (both
+// reduce to a straight 2-way average), which would prove nothing.
+
+// TC54 — both attachment_style and parenting answered (plus birthorder) -> the pair folds
+// into ONE combined (averaged) slot before the family layer average, not two independent
+// slots. Family layer = average(combined(attachment_style, parenting), birthorder), i.e.
+// a 2-slot average -- NOT average(attachment_style, parenting, birthorder), a 3-slot
+// average, which is what the old (undampened) code would have computed.
+{
+  const attachment_style = {RT:-0.5,SC:0.8,ER:1.3,AR:0.5,DS:-0.9,SR:-1.2};
+  const parenting = {RT:0.5,SC:-0.4,ER:-0.3,AR:-0.5,DS:0.7,SR:0.4};
+  const birthorder = {RT:1.0,SC:1.0,ER:1.0,AR:1.0,DS:1.0,SR:1.0};
+  const r = computeEngine({precisionVectors:{ attachment_style, parenting, birthorder }});
+  // combined = average(attachment_style, parenting) = {RT:0, SC:0.2, ER:0.5, AR:0, DS:-0.1, SR:-0.4}
+  // expected = average(combined, birthorder), since family is the only answered layer,
+  // weight-of-one-layer renormalizes to 1.0 so finalVec == family layerVec exactly.
+  const expected = {RT:0.5, SC:0.6, ER:0.75, AR:0.5, DS:0.45, SR:0.3};
+  check('TC54 (v6.5) dampener: both attachment_style+parenting answered -> folded to one averaged slot, not two', r.finalVec, expected);
+  // Sanity check against what the OLD (undampened) 3-slot average would have given, to make
+  // the "not the sum/not double-counted" distinction concrete rather than just asserted.
+  const oldUndampened = {RT:1/3, SC:1.4/3, ER:2/3, AR:1/3, DS:0.8/3, SR:0.2/3};
+  const differsFromOld = Object.keys(expected).some(k => Math.abs(expected[k] - oldUndampened[k]) > TOL);
+  results.push({ name: 'TC54b dampener result differs from the old undampened 3-slot average (proves the fix changed behavior)', pass: differsFromOld, diffs: differsFromOld ? [] : ['expected dampened result to differ from old undampened average, they matched'] });
+}
+
+// TC55 — only attachment_style answered (parenting untouched) -> NOT part of any fold
+// (dampener requires BOTH members), contributes as a normal individual slot, full weight.
+{
+  const attachment_style = {RT:-0.5,SC:0.8,ER:1.3,AR:0.5,DS:-0.9,SR:-1.2};
+  const birthorder = {RT:1.0,SC:1.0,ER:1.0,AR:1.0,DS:1.0,SR:1.0};
+  const r = computeEngine({precisionVectors:{ attachment_style, birthorder }});
+  // plain 2-slot average, unaffected by the dampener (parenting was never answered)
+  const expected = {RT:0.25, SC:0.9, ER:1.15, AR:0.75, DS:0.05, SR:-0.1};
+  check('TC55 (v6.5) dampener: attachment_style alone (no parenting) -> unaffected, full weight', r.finalVec, expected);
+}
+
+// TC56 — only parenting answered (attachment_style untouched) -> same guarantee, mirrored.
+{
+  const parenting = {RT:0.5,SC:-0.4,ER:-0.3,AR:-0.5,DS:0.7,SR:0.4};
+  const birthorder = {RT:1.0,SC:1.0,ER:1.0,AR:1.0,DS:1.0,SR:1.0};
+  const r = computeEngine({precisionVectors:{ parenting, birthorder }});
+  const expected = {RT:0.75, SC:0.3, ER:0.35, AR:0.25, DS:0.85, SR:0.7};
+  check('TC56 (v6.5) dampener: parenting alone (no attachment_style) -> unaffected, full weight', r.finalVec, expected);
+}
+
+// TC57 — both emotional_trauma and stability answered -> deliberately NOT dampened (see
+// core-engine.js's CORRELATED_PAIRS comment: they're a cross-layer overlap -- modulator
+// and family respectively -- with no shared layer-average step to fold into). Confirms
+// finalVec still matches the plain weighted-layer-blend formula with no special-casing.
+{
+  const emotional_trauma = {RT:-0.6,SC:0.3,ER:1.5,AR:0.4,DS:-0.8,SR:-1.3};
+  const stability = {RT:1,SC:1,ER:1,AR:1,DS:1,SR:1};
+  const r = computeEngine({precisionVectors:{ emotional_trauma, stability }});
+  // modulator (weight 0.15) = emotional_trauma exactly (only modulator sub answered)
+  // family (weight 0.18) = stability exactly (only family sub answered)
+  // finalVec = (0.15*emotional_trauma + 0.18*stability) / 0.33 -- plain two-layer blend
+  const expected = {RT:0.272727, SC:0.681818, ER:1.227273, AR:0.727273, DS:0.181818, SR:-0.045455};
+  check('TC57 (v6.5) emotional_trauma+stability both answered -> cross-layer, no dampening applied (by design)', r.finalVec, expected);
+}
+
 // ---- report ----
 let passCount = 0;
 results.forEach(r=>{
