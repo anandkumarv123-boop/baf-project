@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>A Few Questions About You</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#FAFAF8; --card:#FFFFFF; --border:#E2E2DD; --text:#222222; --muted:#6B6B65;
+  --accent:#1F4E5F; --accent-light:#EAF2F4; --good:#2E7D4F;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.5;}
+.wrap{max-width:720px;margin:0 auto;padding:28px 20px 100px;}
+h1{font-size:26px;margin:0 0 8px;color:var(--accent);}
+.sub{color:var(--muted);font-size:14px;margin-bottom:20px;}
+.intro{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:20px;font-size:14.5px;}
+.intro p{margin:0 0 10px;}
+.intro p:last-child{margin-bottom:0;}
+.consent-row{display:flex;gap:20px;align-items:center;margin-top:14px;font-weight:600;}
+.consent-row label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+label.field{display:block;margin-bottom:14px;font-size:14px;color:var(--muted);}
+input[type=text]{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;margin-top:4px;}
+.section-title{font-size:19px;font-weight:700;color:var(--accent);margin:28px 0 6px;border-bottom:2px solid var(--accent-light);padding-bottom:6px;}
+.section-note{color:var(--muted);font-size:13.5px;margin-bottom:16px;}
+.group-header{font-size:15px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:8px 12px;border-radius:6px;margin:22px 0 10px;}
+.q{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.qnum{display:none;}
+.qtext{font-size:15px;font-weight:600;margin-bottom:10px;}
+.qtext-italic{font-style:italic;font-weight:500;color:#333;}
+.opts{display:flex;flex-direction:column;gap:6px;}
+label.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:14.5px;}
+label.opt:hover{background:var(--accent-light);}
+label.opt input{margin-top:3px;}
+.likert-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.lend{font-size:11px;color:var(--muted);text-align:center;width:70px;line-height:1.2;}
+.bend{font-size:12.5px;color:var(--muted);text-align:right;width:150px;line-height:1.3;}
+.baseline-row .bend:last-child{text-align:left;}
+label.lopt{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:14px;font-weight:700;}
+label.lopt input{width:20px;height:20px;}
+.progress-bar{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:10;border-bottom:1px solid var(--border);margin-bottom:6px;}
+.progress-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--good);width:0%;transition:width .2s;}
+.progress-text{font-size:12.5px;color:var(--muted);margin-top:4px;text-align:center;}
+.submit-btn{width:100%;background:var(--accent);color:#fff;border:none;padding:16px;font-size:17px;font-weight:700;border-radius:8px;cursor:pointer;margin-top:24px;}
+.submit-btn:hover{filter:brightness(1.1);}
+.result{display:none;background:var(--card);border:2px solid var(--good);border-radius:8px;padding:20px;margin-top:20px;}
+.result h2{color:var(--good);font-size:19px;margin:0 0 10px;}
+textarea{width:100%;height:200px;font-family:monospace;font-size:12px;padding:10px;border:1px solid var(--border);border-radius:6px;}
+.btn-row{display:flex;gap:10px;margin-top:10px;}
+.btn-row button{flex:1;padding:10px;border-radius:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);font-weight:600;cursor:pointer;}
+.btn-row button:hover{background:var(--accent-light);}
+.error-msg{color:#B00020;font-weight:600;font-size:14px;margin-top:10px;display:none;}
+</style>
+</head>
+<body>
+<div class="progress-bar">
+  <div class="wrap" style="padding:0 20px;">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 of 102 answered</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1>A Few Questions About You</h1>
+  <div class="sub">This is a self-reflection questionnaire, not a psychological test or diagnosis of any kind.</div>
+
+  <form id="bafForm">
+  <div class="intro">
+    <p>There are no right or wrong answers here — just answer honestly, based on how things actually are for you, not how you'd like them to be.</p>
+    <p>This is completely voluntary. You can stop at any time. Your answers are scored by a simple rules-based tool, not reviewed by a person.</p>
+    <div class="consent-row">
+      Do you agree to participate on these terms?
+      <label><input type="radio" name="consent" value="yes" required> Yes</label>
+      <label><input type="radio" name="consent" value="no"> No</label>
+    </div>
+  </div>
+
+  <label class="field">Respondent code (ask your administrator what to use — do not use your real name)
+    <input type="text" id="respondentCode" placeholder="e.g. R-0001">
+  </label>
+    <div class="section-title">Part 1 — About You, Right Now</div>
+    <div class="section-note">For each pair below, pick the number that best fits you — 1 if you strongly lean toward the left description, 5 if you strongly lean toward the right, or anywhere in between.</div>
+    
+    <div class="q likert-q">
+      <div class="likert-row baseline-row">
+        <span class="bend">I prefer sticking with what's safe and predictable</span>
+        <label class="lopt"><input type="radio" name="baseline_RT" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="baseline_RT" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="baseline_RT" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="baseline_RT" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="baseline_RT" value="5" required><span>5</span></label>
+        <span class="bend">I enjoy taking risks and trying new things</span>
+      </div>
+    </div>
+    <div class="q likert-q">
+      <div class="likert-row baseline-row">
+        <span class="bend">I make my own choices, even if others disagree</span>
+        <label class="lopt"><input type="radio" name="baseline_SC" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="baseline_SC" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="baseline_SC" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="baseline_SC" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="baseline_SC" value="5" required><span>5</span></label>
+        <span class="bend">I try to fit in with what the people around me expect</span>
+      </div>
+    </div>
+    <div class="q likert-q">
+      <div class="likert-row baseline-row">
+        <span class="bend">My mood stays pretty steady, even under pressure</span>
+        <label class="lopt"><input type="radio" name="baseline_ER" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="baseline_ER" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="baseline_ER" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="baseline_ER" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="baseline_ER" value="5" required><span>5</span></label>
+        <span class="bend">My mood shifts noticeably when things get stressful</span>
+      </div>
+    </div>
+    <div class="q likert-q">
+      <div class="likert-row baseline-row">
+        <span class="bend">I question authority and rules that don't make sense to me</span>
+        <label class="lopt"><input type="radio" name="baseline_AR" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="baseline_AR" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="baseline_AR" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="baseline_AR" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="baseline_AR" value="5" required><span>5</span></label>
+        <span class="bend">I generally trust and follow authority and structure</span>
+      </div>
+    </div>
+    <div class="q likert-q">
+      <div class="likert-row baseline-row">
+        <span class="bend">I like talking things through with others before deciding</span>
+        <label class="lopt"><input type="radio" name="baseline_DS" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="baseline_DS" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="baseline_DS" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="baseline_DS" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="baseline_DS" value="5" required><span>5</span></label>
+        <span class="bend">I prefer to think things through myself and decide alone</span>
+      </div>
+    </div>
+    <div class="q likert-q">
+      <div class="likert-row baseline-row">
+        <span class="bend">Stress tends to knock me off balance for a while</span>
+        <label class="lopt"><input type="radio" name="baseline_SR" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="baseline_SR" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="baseline_SR" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="baseline_SR" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="baseline_SR" value="5" required><span>5</span></label>
+        <span class="bend">I bounce back from stress fairly quickly</span>
+      </div>
+    </div>
+
+    <div class="section-title">Part 2 — About Your Life & Background</div>
+    <div class="section-note">Pick the option that fits best, and a number for the statement underneath it.</div>
+    <div class="group-header">Where You Grew Up</div>
+
+    <div class="q">
+      <div class="qnum">1</div>
+      <div class="qtext">Where did you spend most of your childhood?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="terrain_pick" value="A" required> <span>A. Coastal</span></label><label class="opt"><input type="radio" name="terrain_pick" value="B" required> <span>B. Mountain / remote</span></label><label class="opt"><input type="radio" name="terrain_pick" value="C" required> <span>C. Dense urban</span></label><label class="opt"><input type="radio" name="terrain_pick" value="D" required> <span>D. Rural / agrarian</span></label><label class="opt"><input type="radio" name="terrain_pick" value="E" required> <span>E. Desert / arid</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">2</div>
+      <div class="qtext qtext-italic">&ldquo;Local geography strongly shaped my willingness to take risks&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="terrain_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="terrain_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="terrain_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="terrain_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="terrain_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">3</div>
+      <div class="qtext">What was the weather like where you grew up?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="climate_pick" value="A" required> <span>A. Stable / mild</span></label><label class="opt"><input type="radio" name="climate_pick" value="B" required> <span>B. Seasonal / moderate swings</span></label><label class="opt"><input type="radio" name="climate_pick" value="C" required> <span>C. Extreme / volatile</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">4</div>
+      <div class="qtext qtext-italic">&ldquo;I adapt easily when conditions around me change unpredictably&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="climate_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="climate_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="climate_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="climate_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="climate_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">5</div>
+      <div class="qtext">How crowded was the area where you grew up?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="density_pick" value="A" required> <span>A. High density</span></label><label class="opt"><input type="radio" name="density_pick" value="B" required> <span>B. Medium density</span></label><label class="opt"><input type="radio" name="density_pick" value="C" required> <span>C. Low density / sparse</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">6</div>
+      <div class="qtext qtext-italic">&ldquo;I feel energized rather than drained in crowded environments&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="density_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="density_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="density_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="density_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="density_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">Your Body & Energy</div>
+
+    <div class="q">
+      <div class="qnum">7</div>
+      <div class="qtext">How would you describe your usual energy level?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="energy_pick" value="A" required> <span>A. High</span></label><label class="opt"><input type="radio" name="energy_pick" value="B" required> <span>B. Moderate</span></label><label class="opt"><input type="radio" name="energy_pick" value="C" required> <span>C. Low / fatigued</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">8</div>
+      <div class="qtext qtext-italic">&ldquo;I sustain effort over long stretches without burning out&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="energy_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="energy_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="energy_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="energy_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="energy_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">9</div>
+      <div class="qtext">How would you describe your general health?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="health_pick" value="A" required> <span>A. Robust</span></label><label class="opt"><input type="radio" name="health_pick" value="B" required> <span>B. Managing a chronic condition</span></label><label class="opt"><input type="radio" name="health_pick" value="C" required> <span>C. Frequently unwell</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">10</div>
+      <div class="qtext qtext-italic">&ldquo;Physical discomfort easily derails my mood or focus&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="health_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="health_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="health_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="health_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="health_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">11</div>
+      <div class="qtext">What is your age range?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="age_pick" value="A" required> <span>A. 18–25</span></label><label class="opt"><input type="radio" name="age_pick" value="B" required> <span>B. 26–40</span></label><label class="opt"><input type="radio" name="age_pick" value="C" required> <span>C. 41–60</span></label><label class="opt"><input type="radio" name="age_pick" value="D" required> <span>D. 60+</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">12</div>
+      <div class="qtext qtext-italic">&ldquo;I feel my life stage makes me more deliberate than impulsive&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="age_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="age_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="age_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="age_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="age_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">13</div>
+      <div class="qtext">When did you last eat?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="nutrition_pick" value="A" required> <span>A. Just eaten, blood sugar stable</span></label><label class="opt"><input type="radio" name="nutrition_pick" value="B" required> <span>B. A few hours since eating, mild hunger</span></label><label class="opt"><input type="radio" name="nutrition_pick" value="C" required> <span>C. Haven't eaten in a while / low blood sugar</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">14</div>
+      <div class="qtext qtext-italic">&ldquo;Hunger or low blood sugar noticeably affects my mood and choices&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="nutrition_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="nutrition_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="nutrition_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="nutrition_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="nutrition_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">15</div>
+      <div class="qtext">Which best describes your natural temperament?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="temperament_pick" value="A" required> <span>A. High reactivity / sensitive temperament</span></label><label class="opt"><input type="radio" name="temperament_pick" value="B" required> <span>B. Even-keeled / low-reactivity temperament</span></label><label class="opt"><input type="radio" name="temperament_pick" value="C" required> <span>C. Mixed / context-dependent</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">16</div>
+      <div class="qtext qtext-italic">&ldquo;Even under similar circumstances, I've always reacted more intensely
+than people around me&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="temperament_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="temperament_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="temperament_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="temperament_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="temperament_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">17</div>
+      <div class="qtext">When making decisions, are you more...?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="cognitive_style_pick" value="A" required> <span>A. Strongly analytical / deliberate (System 2 dominant)</span></label><label class="opt"><input type="radio" name="cognitive_style_pick" value="B" required> <span>B. Balanced / context-dependent</span></label><label class="opt"><input type="radio" name="cognitive_style_pick" value="C" required> <span>C. Strongly intuitive / fast-thinking (System 1 dominant)</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">18</div>
+      <div class="qtext qtext-italic">&ldquo;I trust my gut instinct over slow, deliberate analysis when making
+decisions&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="cognitive_style_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="cognitive_style_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="cognitive_style_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="cognitive_style_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="cognitive_style_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">Your Family Background</div>
+
+    <div class="q">
+      <div class="qnum">19</div>
+      <div class="qtext">How would you describe how you were raised?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="parenting_pick" value="A" required> <span>A. Authoritative (warm + structured)</span></label><label class="opt"><input type="radio" name="parenting_pick" value="B" required> <span>B. Authoritarian (strict, low warmth)</span></label><label class="opt"><input type="radio" name="parenting_pick" value="C" required> <span>C. Permissive (warm, low structure)</span></label><label class="opt"><input type="radio" name="parenting_pick" value="D" required> <span>D. Neglectful / low involvement</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">20</div>
+      <div class="qtext qtext-italic">&ldquo;I second-guess decisions unless I get external approval first&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="parenting_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="parenting_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="parenting_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="parenting_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="parenting_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">21</div>
+      <div class="qtext">What is your birth order?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="birthorder_pick" value="A" required> <span>A. Firstborn</span></label><label class="opt"><input type="radio" name="birthorder_pick" value="B" required> <span>B. Middle child</span></label><label class="opt"><input type="radio" name="birthorder_pick" value="C" required> <span>C. Youngest</span></label><label class="opt"><input type="radio" name="birthorder_pick" value="D" required> <span>D. Only child</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">22</div>
+      <div class="qtext qtext-italic">&ldquo;I naturally step into a caretaker/organizer role in groups&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="birthorder_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="birthorder_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="birthorder_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="birthorder_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="birthorder_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">23</div>
+      <div class="qtext">How stable was your household growing up?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="stability_pick" value="A" required> <span>A. Stable / consistent</span></label><label class="opt"><input type="radio" name="stability_pick" value="B" required> <span>B. Frequent disruption / moves</span></label><label class="opt"><input type="radio" name="stability_pick" value="C" required> <span>C. High conflict household</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">24</div>
+      <div class="qtext qtext-italic">&ldquo;Sudden disruption rattles me more than it should&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="stability_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="stability_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="stability_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="stability_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="stability_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">25</div>
+      <div class="qtext">In close relationships, which best describes you?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="attachment_style_pick" value="A" required> <span>A. Secure (comfortable with closeness and independence)</span></label><label class="opt"><input type="radio" name="attachment_style_pick" value="B" required> <span>B. Anxious (craves closeness, fears abandonment)</span></label><label class="opt"><input type="radio" name="attachment_style_pick" value="C" required> <span>C. Avoidant (values independence, uneasy with closeness)</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">26</div>
+      <div class="qtext qtext-italic">&ldquo;In close relationships, I tend to worry about being abandoned or I rely
+heavily on distance to feel safe&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="attachment_style_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="attachment_style_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="attachment_style_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="attachment_style_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="attachment_style_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">27</div>
+      <div class="qtext">How much do past successes/failures still affect you?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="past_failures_pick" value="A" required> <span>A. Past failures/successes feel processed, don't dominate outlook</span></label><label class="opt"><input type="radio" name="past_failures_pick" value="B" required> <span>B. Some past events still shape current confidence somewhat</span></label><label class="opt"><input type="radio" name="past_failures_pick" value="C" required> <span>C. A major past failure/success still strongly shapes how I approach</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">28</div>
+      <div class="qtext qtext-italic">&ldquo;A significant past success or failure still strongly shapes how I
+approach similar situations today&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="past_failures_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="past_failures_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="past_failures_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="past_failures_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="past_failures_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">29</div>
+      <div class="qtext">How would you describe your childhood overall?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="ace_pick" value="A" required> <span>A. Low / no significant childhood adversity (0-1 ACEs)</span></label><label class="opt"><input type="radio" name="ace_pick" value="B" required> <span>B. Moderate childhood adversity (2-3 ACEs)</span></label><label class="opt"><input type="radio" name="ace_pick" value="C" required> <span>C. High childhood adversity (4+ ACEs)</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">30</div>
+      <div class="qtext qtext-italic">&ldquo;Difficult experiences in my childhood (abuse, neglect, household
+dysfunction) still measurably affect my choices and stress response
+today&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="ace_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="ace_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="ace_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="ace_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="ace_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">Culture & Values</div>
+
+    <div class="q">
+      <div class="qnum">31</div>
+      <div class="qtext">Do you lean more toward group harmony or personal independence?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="collectivism_pick" value="A" required> <span>A. Strongly collectivist</span></label><label class="opt"><input type="radio" name="collectivism_pick" value="B" required> <span>B. Moderately collectivist</span></label><label class="opt"><input type="radio" name="collectivism_pick" value="C" required> <span>C. Balanced / bicultural</span></label><label class="opt"><input type="radio" name="collectivism_pick" value="D" required> <span>D. Moderately individualist</span></label><label class="opt"><input type="radio" name="collectivism_pick" value="E" required> <span>E. Strongly individualist</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">32</div>
+      <div class="qtext qtext-italic">&ldquo;I feel uncomfortable going against group consensus&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="collectivism_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="collectivism_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="collectivism_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="collectivism_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="collectivism_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">33</div>
+      <div class="qtext">How closely do you follow tradition and custom?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="tradition_pick" value="A" required> <span>A. High adherence</span></label><label class="opt"><input type="radio" name="tradition_pick" value="B" required> <span>B. Moderate</span></label><label class="opt"><input type="radio" name="tradition_pick" value="C" required> <span>C. Low / rejecting</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">34</div>
+      <div class="qtext qtext-italic">&ldquo;I actively seek out new customs/approaches over familiar ones&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="tradition_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="tradition_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="tradition_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="tradition_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="tradition_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">Your Social Circle</div>
+
+    <div class="q">
+      <div class="qnum">35</div>
+      <div class="qtext">What best describes your circle of close friends?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="density_net_pick" value="A" required> <span>A. Large, tight-knit peer group</span></label><label class="opt"><input type="radio" name="density_net_pick" value="B" required> <span>B. Small close circle</span></label><label class="opt"><input type="radio" name="density_net_pick" value="C" required> <span>C. Solitary / few ties</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">36</div>
+      <div class="qtext qtext-italic">&ldquo;My close relationships strongly influence my day-to-day choices&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="density_net_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="density_net_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="density_net_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="density_net_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="density_net_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">37</div>
+      <div class="qtext">Are your social interactions mostly in-person or online?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="digital_ratio_pick" value="A" required> <span>A. Mostly in-person</span></label><label class="opt"><input type="radio" name="digital_ratio_pick" value="B" required> <span>B. Balanced mix</span></label><label class="opt"><input type="radio" name="digital_ratio_pick" value="C" required> <span>C. Mostly digital / online</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">38</div>
+      <div class="qtext qtext-italic">&ldquo;Online interactions affect my mood more than in-person ones&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="digital_ratio_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="digital_ratio_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="digital_ratio_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="digital_ratio_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="digital_ratio_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">39</div>
+      <div class="qtext">How much do you compare yourself to others?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="social_comparison_pick" value="A" required> <span>A. Rarely compares self to others</span></label><label class="opt"><input type="radio" name="social_comparison_pick" value="B" required> <span>B. Occasionally compares, mild competitive pull</span></label><label class="opt"><input type="radio" name="social_comparison_pick" value="C" required> <span>C. Frequently compares; strong competitive pressure</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">40</div>
+      <div class="qtext qtext-italic">&ldquo;Seeing how others are doing compared to me strongly affects my mood and
+choices&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="social_comparison_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="social_comparison_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="social_comparison_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="social_comparison_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="social_comparison_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">41</div>
+      <div class="qtext">Is there ongoing conflict in a close relationship right now?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="relationship_conflict_pick" value="A" required> <span>A. Currently low conflict in close relationships</span></label><label class="opt"><input type="radio" name="relationship_conflict_pick" value="B" required> <span>B. Some ongoing tension in a close relationship</span></label><label class="opt"><input type="radio" name="relationship_conflict_pick" value="C" required> <span>C. Significant ongoing conflict in a close relationship</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">42</div>
+      <div class="qtext qtext-italic">&ldquo;Conflict with someone close to me is currently affecting my mood and
+focus&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="relationship_conflict_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="relationship_conflict_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="relationship_conflict_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="relationship_conflict_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="relationship_conflict_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">43</div>
+      <div class="qtext">Do you feel included or excluded by others lately?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="social_exclusion_pick" value="A" required> <span>A. Feels consistently included / connected</span></label><label class="opt"><input type="radio" name="social_exclusion_pick" value="B" required> <span>B. Occasional feelings of exclusion</span></label><label class="opt"><input type="radio" name="social_exclusion_pick" value="C" required> <span>C. Significant recent exclusion or rejection</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">44</div>
+      <div class="qtext qtext-italic">&ldquo;Being excluded or rejected by others affects me more intensely than I'd
+expect&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="social_exclusion_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="social_exclusion_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="social_exclusion_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="social_exclusion_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="social_exclusion_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">45</div>
+      <div class="qtext">How often do you feel lonely or isolated?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="loneliness_pick" value="A" required> <span>A. Rarely feels lonely / feels socially connected</span></label><label class="opt"><input type="radio" name="loneliness_pick" value="B" required> <span>B. Occasional feelings of loneliness</span></label><label class="opt"><input type="radio" name="loneliness_pick" value="C" required> <span>C. Persistent, significant loneliness / social isolation</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">46</div>
+      <div class="qtext qtext-italic">&ldquo;I feel isolated or disconnected from others, even when people are
+around&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="loneliness_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="loneliness_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="loneliness_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="loneliness_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="loneliness_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">Money & Finances</div>
+
+    <div class="q">
+      <div class="qnum">47</div>
+      <div class="qtext">How would you describe your current financial situation?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="current_stability_pick" value="A" required> <span>A. Stable / comfortable</span></label><label class="opt"><input type="radio" name="current_stability_pick" value="B" required> <span>B. Fluctuating / unstable</span></label><label class="opt"><input type="radio" name="current_stability_pick" value="C" required> <span>C. Chronic scarcity</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">48</div>
+      <div class="qtext qtext-italic">&ldquo;Financial pressure is currently on my mind often&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="current_stability_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="current_stability_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="current_stability_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="current_stability_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="current_stability_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">49</div>
+      <div class="qtext">Growing up, was money tight or comfortable?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="formative_scarcity_pick" value="A" required> <span>A. Grew up abundant</span></label><label class="opt"><input type="radio" name="formative_scarcity_pick" value="B" required> <span>B. Grew up moderate</span></label><label class="opt"><input type="radio" name="formative_scarcity_pick" value="C" required> <span>C. Grew up scarce</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">50</div>
+      <div class="qtext qtext-italic">&ldquo;I still think in scarcity terms even when resources are fine now&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="formative_scarcity_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="formative_scarcity_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="formative_scarcity_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="formative_scarcity_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="formative_scarcity_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">51</div>
+      <div class="qtext">How rushed do you usually feel?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="time_pressure_pick" value="A" required> <span>A. Rarely feels rushed / plenty of time</span></label><label class="opt"><input type="radio" name="time_pressure_pick" value="B" required> <span>B. Occasionally rushed / moderate time pressure</span></label><label class="opt"><input type="radio" name="time_pressure_pick" value="C" required> <span>C. Constantly under significant time pressure</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">52</div>
+      <div class="qtext qtext-italic">&ldquo;Being rushed noticeably changes the quality of decisions I make&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="time_pressure_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="time_pressure_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="time_pressure_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="time_pressure_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="time_pressure_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">How You Think & Learn</div>
+
+    <div class="q">
+      <div class="qnum">53</div>
+      <div class="qtext">What is your education background?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="education_pick" value="A" required> <span>A. Formal higher education</span></label><label class="opt"><input type="radio" name="education_pick" value="B" required> <span>B. Vocational / trade training</span></label><label class="opt"><input type="radio" name="education_pick" value="C" required> <span>C. Self-taught / autodidact</span></label><label class="opt"><input type="radio" name="education_pick" value="D" required> <span>D. Limited formal schooling</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">54</div>
+      <div class="qtext qtext-italic">&ldquo;I default to structured/analytical reasoning over gut instinct&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="education_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="education_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="education_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="education_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="education_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">55</div>
+      <div class="qtext">How open are you to changing your mind with new evidence?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="schema_flex_pick" value="A" required> <span>A. Rigid / fixed</span></label><label class="opt"><input type="radio" name="schema_flex_pick" value="B" required> <span>B. Balanced</span></label><label class="opt"><input type="radio" name="schema_flex_pick" value="C" required> <span>C. Highly flexible / lifelong learner</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">56</div>
+      <div class="qtext qtext-italic">&ldquo;I update my beliefs quickly when given new evidence&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="schema_flex_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="schema_flex_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="schema_flex_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="schema_flex_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="schema_flex_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">57</div>
+      <div class="qtext">How often do you feel overwhelmed by too much to process?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="cognitive_overload_pick" value="A" required> <span>A. Rarely overloaded</span></label><label class="opt"><input type="radio" name="cognitive_overload_pick" value="B" required> <span>B. Occasionally overloaded by too much input</span></label><label class="opt"><input type="radio" name="cognitive_overload_pick" value="C" required> <span>C. Frequently overwhelmed by information/demands</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">58</div>
+      <div class="qtext qtext-italic">&ldquo;When I have too much to process at once, my decisions get noticeably
+worse&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="cognitive_overload_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="cognitive_overload_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="cognitive_overload_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="cognitive_overload_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="cognitive_overload_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">59</div>
+      <div class="qtext">Does your decision-making get worse later in the day?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="decision_fatigue_pick" value="A" required> <span>A. Decision quality stays consistent all day</span></label><label class="opt"><input type="radio" name="decision_fatigue_pick" value="B" required> <span>B. Some drop-off in decision quality later in the day</span></label><label class="opt"><input type="radio" name="decision_fatigue_pick" value="C" required> <span>C. Sharp drop-off; defaults to easiest option when fatigued</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">60</div>
+      <div class="qtext qtext-italic">&ldquo;By the end of a demanding day, I make noticeably worse decisions&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="decision_fatigue_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="decision_fatigue_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="decision_fatigue_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="decision_fatigue_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="decision_fatigue_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">61</div>
+      <div class="qtext">Are you easily swayed by how something is presented to you?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="anchoring_framing_pick" value="A" required> <span>A. Rarely swayed by how something is framed</span></label><label class="opt"><input type="radio" name="anchoring_framing_pick" value="B" required> <span>B. Somewhat influenced by framing / first numbers seen</span></label><label class="opt"><input type="radio" name="anchoring_framing_pick" value="C" required> <span>C. Strongly influenced by framing / initial anchors</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">62</div>
+      <div class="qtext qtext-italic">&ldquo;The way information is presented to me changes my decision more than it
+probably should&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="anchoring_framing_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="anchoring_framing_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="anchoring_framing_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="anchoring_framing_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="anchoring_framing_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">63</div>
+      <div class="qtext">Do you keep going with things that aren't working out?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="sunk_cost_pick" value="A" required> <span>A. Cuts losses easily, ignores past investment</span></label><label class="opt"><input type="radio" name="sunk_cost_pick" value="B" required> <span>B. Somewhat reluctant to abandon past investment</span></label><label class="opt"><input type="radio" name="sunk_cost_pick" value="C" required> <span>C. Strongly persists with failing efforts due to past investment</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">64</div>
+      <div class="qtext qtext-italic">&ldquo;I keep going with something that isn't working because of what I've
+already put into it&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="sunk_cost_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="sunk_cost_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="sunk_cost_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="sunk_cost_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="sunk_cost_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">65</div>
+      <div class="qtext">Do recent or memorable examples influence your judgment a lot?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="availability_heuristic_pick" value="A" required> <span>A. Weighs evidence broadly, not just recent/vivid examples</span></label><label class="opt"><input type="radio" name="availability_heuristic_pick" value="B" required> <span>B. Somewhat swayed by recent or vivid examples</span></label><label class="opt"><input type="radio" name="availability_heuristic_pick" value="C" required> <span>C. Judgments strongly driven by whatever comes to mind easily</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">66</div>
+      <div class="qtext qtext-italic">&ldquo;A recent or memorable example sticks with me more than the overall
+evidence does&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="availability_heuristic_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="availability_heuristic_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="availability_heuristic_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="availability_heuristic_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="availability_heuristic_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">67</div>
+      <div class="qtext">Do you struggle to decide when there are too many options?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="info_overload_pick" value="A" required> <span>A. Comfortable deciding with limited information</span></label><label class="opt"><input type="radio" name="info_overload_pick" value="B" required> <span>B. Sometimes stalls when there's too much to weigh</span></label><label class="opt"><input type="radio" name="info_overload_pick" value="C" required> <span>C. Frequently paralyzed by too many options/inputs</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">68</div>
+      <div class="qtext qtext-italic">&ldquo;Too many options or too much information makes it harder for me to
+decide at all&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="info_overload_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="info_overload_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="info_overload_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="info_overload_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="info_overload_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">Recent Life Changes</div>
+
+    <div class="q">
+      <div class="qnum">69</div>
+      <div class="qtext">Have you experienced a significant loss recently?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="grief_pick" value="A" required> <span>A. No recent significant loss</span></label><label class="opt"><input type="radio" name="grief_pick" value="B" required> <span>B. Processing a recent loss, functioning mostly intact</span></label><label class="opt"><input type="radio" name="grief_pick" value="C" required> <span>C. Acute grief significantly disrupting daily life</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">70</div>
+      <div class="qtext qtext-italic">&ldquo;A recent loss is still significantly affecting how I think and feel day
+to day&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="grief_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="grief_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="grief_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="grief_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="grief_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">71</div>
+      <div class="qtext">Are you going through a major life change right now?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="life_transitions_pick" value="A" required> <span>A. No major transition currently underway</span></label><label class="opt"><input type="radio" name="life_transitions_pick" value="B" required> <span>B. Navigating a moderate life transition</span></label><label class="opt"><input type="radio" name="life_transitions_pick" value="C" required> <span>C. In the middle of a major, disruptive life transition</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">72</div>
+      <div class="qtext qtext-italic">&ldquo;A major life change I'm currently going through is significantly
+affecting my choices&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="life_transitions_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="life_transitions_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="life_transitions_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="life_transitions_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="life_transitions_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+<div class="group-header">How You're Doing Right Now</div>
+
+    <div class="q">
+      <div class="qnum">73</div>
+      <div class="qtext">Right now, how would you describe your sense of self?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="ego_pick" value="A" required> <span>A. Secure</span></label><label class="opt"><input type="radio" name="ego_pick" value="B" required> <span>B. Fragile</span></label><label class="opt"><input type="radio" name="ego_pick" value="C" required> <span>C. Inflated</span></label><label class="opt"><input type="radio" name="ego_pick" value="D" required> <span>D. Depleted / burned out</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">74</div>
+      <div class="qtext qtext-italic">&ldquo;Criticism affects my mood far more than most people around me&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="ego_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="ego_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="ego_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="ego_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="ego_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">75</div>
+      <div class="qtext">How stressed do you feel right now?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="stress_pick" value="A" required> <span>A. Low</span></label><label class="opt"><input type="radio" name="stress_pick" value="B" required> <span>B. Moderate</span></label><label class="opt"><input type="radio" name="stress_pick" value="C" required> <span>C. High</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">76</div>
+      <div class="qtext qtext-italic">&ldquo;I can name specific things causing me stress right now&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="stress_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="stress_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="stress_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="stress_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="stress_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">77</div>
+      <div class="qtext">How has your sleep been lately?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="sleep_pick" value="A" required> <span>A. Good</span></label><label class="opt"><input type="radio" name="sleep_pick" value="B" required> <span>B. Poor</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">78</div>
+      <div class="qtext qtext-italic">&ldquo;Poor sleep visibly changes how I react to people&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="sleep_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="sleep_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="sleep_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="sleep_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="sleep_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">79</div>
+      <div class="qtext">Have you been drinking enough water lately?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="dehydration_pick" value="A" required> <span>A. Well hydrated</span></label><label class="opt"><input type="radio" name="dehydration_pick" value="B" required> <span>B. Mild dehydration (thirsty, slight headache)</span></label><label class="opt"><input type="radio" name="dehydration_pick" value="C" required> <span>C. Noticeably dehydrated (dizzy, hard to concentrate)</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">80</div>
+      <div class="qtext qtext-italic">&ldquo;Not drinking enough water noticeably affects my focus and mood&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="dehydration_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="dehydration_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="dehydration_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="dehydration_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="dehydration_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">81</div>
+      <div class="qtext">Have you noticed hormone-related mood or energy swings lately?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="hormonal_pick" value="A" required> <span>A. Stable / balanced</span></label><label class="opt"><input type="radio" name="hormonal_pick" value="B" required> <span>B. Noticeable cyclical fluctuation (mood/energy shifts)</span></label><label class="opt"><input type="radio" name="hormonal_pick" value="C" required> <span>C. Significant fluctuation strongly affecting mood/energy</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">82</div>
+      <div class="qtext qtext-italic">&ldquo;Hormonal changes noticeably affect my mood, energy, or decision-making&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="hormonal_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="hormonal_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="hormonal_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="hormonal_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="hormonal_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">83</div>
+      <div class="qtext">Are you currently sober, or under the influence of alcohol/substances?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="substance_state_pick" value="A" required> <span>A. Sober / clear-headed</span></label><label class="opt"><input type="radio" name="substance_state_pick" value="B" required> <span>B. Mildly under the influence</span></label><label class="opt"><input type="radio" name="substance_state_pick" value="C" required> <span>C. Significantly under the influence / acute intoxication</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">84</div>
+      <div class="qtext qtext-italic">&ldquo;Alcohol or substance use noticeably changes my risk-taking and
+self-control&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="substance_state_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="substance_state_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="substance_state_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="substance_state_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="substance_state_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">85</div>
+      <div class="qtext">Have you been feeling low or unmotivated lately?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="depression_pick" value="A" required> <span>A. No notable low mood</span></label><label class="opt"><input type="radio" name="depression_pick" value="B" required> <span>B. Occasional low mood / reduced motivation</span></label><label class="opt"><input type="radio" name="depression_pick" value="C" required> <span>C. Persistent low mood / anhedonia</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">86</div>
+      <div class="qtext qtext-italic">&ldquo;Low mood or lack of motivation has been affecting my daily functioning&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="depression_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="depression_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="depression_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="depression_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="depression_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">87</div>
+      <div class="qtext">How much does fear of failing affect your choices?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="fear_failure_pick" value="A" required> <span>A. Low fear of failure</span></label><label class="opt"><input type="radio" name="fear_failure_pick" value="B" required> <span>B. Moderate fear of failure</span></label><label class="opt"><input type="radio" name="fear_failure_pick" value="C" required> <span>C. High fear of failure / rejection sensitivity</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">88</div>
+      <div class="qtext qtext-italic">&ldquo;Fear of failing or being rejected strongly shapes what I choose to do&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="fear_failure_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="fear_failure_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="fear_failure_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="fear_failure_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="fear_failure_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">89</div>
+      <div class="qtext">Do past difficult experiences still affect you when triggered?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="emotional_trauma_pick" value="A" required> <span>A. No significant unresolved trauma</span></label><label class="opt"><input type="radio" name="emotional_trauma_pick" value="B" required> <span>B. Some past difficulty, mostly resolved</span></label><label class="opt"><input type="radio" name="emotional_trauma_pick" value="C" required> <span>C. Significant past trauma that still surfaces under stress</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">90</div>
+      <div class="qtext qtext-italic">&ldquo;Past difficult experiences still get triggered by things that remind me
+of them&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="emotional_trauma_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="emotional_trauma_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="emotional_trauma_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="emotional_trauma_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="emotional_trauma_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">91</div>
+      <div class="qtext">Do you tend to hold onto anger or let it go quickly?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="anger_resentment_pick" value="A" required> <span>A. Rarely angry / lets things go</span></label><label class="opt"><input type="radio" name="anger_resentment_pick" value="B" required> <span>B. Occasionally angry, doesn't linger long</span></label><label class="opt"><input type="radio" name="anger_resentment_pick" value="C" required> <span>C. Frequently angry / holds onto resentment</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">92</div>
+      <div class="qtext qtext-italic">&ldquo;I hold onto anger or resentment longer than most people around me&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="anger_resentment_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="anger_resentment_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="anger_resentment_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="anger_resentment_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="anger_resentment_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">93</div>
+      <div class="qtext">Does shame have a strong effect on your choices?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="shame_pick" value="A" required> <span>A. Rarely experiences shame</span></label><label class="opt"><input type="radio" name="shame_pick" value="B" required> <span>B. Occasional shame, doesn't dominate self-view</span></label><label class="opt"><input type="radio" name="shame_pick" value="C" required> <span>C. Chronic/intense shame shaping self-view and choices</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">94</div>
+      <div class="qtext qtext-italic">&ldquo;Shame about who I am has a powerful, lasting effect on my choices&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="shame_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="shame_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="shame_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="shame_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="shame_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qnum">95</div>
+      <div class="qtext">Do you feel like you're living in line with your values?</div>
+      <div class="opts"><label class="opt"><input type="radio" name="core_values_pick" value="A" required> <span>A. Values feel clear and rarely in conflict with choices</span></label><label class="opt"><input type="radio" name="core_values_pick" value="B" required> <span>B. Values are somewhat clear, occasional conflict</span></label><label class="opt"><input type="radio" name="core_values_pick" value="C" required> <span>C. Values feel unclear or frequently compromised</span></label></div>
+    </div>
+
+    <div class="q likert-q">
+      <div class="qnum">96</div>
+      <div class="qtext qtext-italic">&ldquo;Acting against my core values is something I do more often than I'd
+like&rdquo;</div>
+      <div class="likert-row">
+        <span class="lend">Strongly<br>disagree</span>
+        <label class="lopt"><input type="radio" name="core_values_slider" value="1" required><span>1</span></label><label class="lopt"><input type="radio" name="core_values_slider" value="2" required><span>2</span></label><label class="lopt"><input type="radio" name="core_values_slider" value="3" required><span>3</span></label><label class="lopt"><input type="radio" name="core_values_slider" value="4" required><span>4</span></label><label class="lopt"><input type="radio" name="core_values_slider" value="5" required><span>5</span></label>
+        <span class="lend">Strongly<br>agree</span>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Submit My Answers</button>
+    <div class="error-msg" id="errorMsg">Please answer every question, and confirm you agree to participate, before submitting.</div>
+  </form>
+
+  <div class="result" id="result">
+    <h2>Thank you — that's everything.</h2>
+    <p style="font-size:14px;">Your answers are shown below as data your administrator will use. You can close this page, or use the buttons to copy/download it for them.</p>
+    <textarea id="output" readonly></textarea>
+    <div class="btn-row">
+      <button type="button" id="copyBtn">Copy to Clipboard</button>
+      <button type="button" id="downloadBtn">Download File</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUB_IDS = ["terrain", "climate", "density", "energy", "health", "age", "nutrition", "temperament", "cognitive_style", "parenting", "birthorder", "stability", "attachment_style", "past_failures", "ace", "collectivism", "tradition", "density_net", "digital_ratio", "social_comparison", "relationship_conflict", "social_exclusion", "loneliness", "current_stability", "formative_scarcity", "time_pressure", "education", "schema_flex", "cognitive_overload", "decision_fatigue", "anchoring_framing", "sunk_cost", "availability_heuristic", "info_overload", "grief", "life_transitions", "ego", "stress", "sleep", "dehydration", "hormonal", "substance_state", "depression", "fear_failure", "emotional_trauma", "anger_resentment", "shame", "core_values"];
+const DIMS = ["RT", "SC", "ER", "AR", "DS", "SR"];
+
+const form = document.getElementById('bafForm');
+const allRadioNames = ['consent', ...DIMS.map(d=>'baseline_'+d), ...SUB_IDS.flatMap(id=>[id+'_pick', id+'_slider'])];
+const totalRequired = DIMS.length + SUB_IDS.length*2; // baseline + 2 per sub, consent not counted in progress
+
+function updateProgress(){
+  let answered = 0;
+  DIMS.forEach(d=>{ if(form.querySelector(`input[name="baseline_${d}"]:checked`)) answered++; });
+  SUB_IDS.forEach(id=>{
+    if(form.querySelector(`input[name="${id}_pick"]:checked`)) answered++;
+    if(form.querySelector(`input[name="${id}_slider"]:checked`)) answered++;
+  });
+  const pct = Math.round((answered/totalRequired)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressText').textContent = `${answered} of ${totalRequired} answered`;
+}
+form.addEventListener('change', updateProgress);
+updateProgress();
+
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  const consent = form.querySelector('input[name="consent"]:checked');
+  if(!consent || consent.value !== 'yes'){
+    document.getElementById('errorMsg').style.display = 'block';
+    document.getElementById('errorMsg').textContent = 'You must select "Yes" to participate before submitting.';
+    window.scrollTo(0,0);
+    return;
+  }
+  let missing = [];
+  DIMS.forEach(d=>{ if(!form.querySelector(`input[name="baseline_${d}"]:checked`)) missing.push('baseline_'+d); });
+  SUB_IDS.forEach(id=>{
+    if(!form.querySelector(`input[name="${id}_pick"]:checked`)) missing.push(id+'_pick');
+    if(!form.querySelector(`input[name="${id}_slider"]:checked`)) missing.push(id+'_slider');
+  });
+  if(missing.length > 0){
+    document.getElementById('errorMsg').style.display = 'block';
+    document.getElementById('errorMsg').textContent = `Please answer all questions — ${missing.length} remaining.`;
+    window.scrollTo(0,0);
+    return;
+  }
+  document.getElementById('errorMsg').style.display = 'none';
+
+  const baseline = {};
+  DIMS.forEach(d=>{ baseline[d] = Number(form.querySelector(`input[name="baseline_${d}"]:checked`).value); });
+  const answers = {};
+  SUB_IDS.forEach(id=>{
+    answers[id+'_pick'] = form.querySelector(`input[name="${id}_pick"]:checked`).value;
+    answers[id+'_slider'] = Number(form.querySelector(`input[name="${id}_slider"]:checked`).value);
+  });
+
+  const respondentCode = document.getElementById('respondentCode').value.trim() || 'UNSPECIFIED';
+  const payload = {
+    respondent_code: respondentCode,
+    date: new Date().toISOString().slice(0,10),
+    baseline_1to5: baseline,
+    answers: answers,
+  };
+  const json = JSON.stringify(payload, null, 2);
+  document.getElementById('output').value = json;
+  document.getElementById('result').style.display = 'block';
+  form.style.display = 'none';
+  document.querySelector('.progress-bar').style.display = 'none';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+
+  document.getElementById('copyBtn').onclick = () => {
+    navigator.clipboard.writeText(json);
+    document.getElementById('copyBtn').textContent = 'Copied!';
+    setTimeout(()=>document.getElementById('copyBtn').textContent='Copy to Clipboard', 1500);
+  };
+  document.getElementById('downloadBtn').onclick = () => {
+    const blob = new Blob([json], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `BAF_${respondentCode}_${payload.date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+});
+</script>
+</body>
+</html>
