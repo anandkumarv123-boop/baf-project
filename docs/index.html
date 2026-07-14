@@ -21,6 +21,7 @@ h1{font-size:26px;margin:0 0 8px;color:var(--accent);}
 .consent-row label{display:flex;align-items:center;gap:6px;cursor:pointer;}
 label.field{display:block;margin-bottom:14px;font-size:14px;color:var(--muted);}
 input[type=text]{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;margin-top:4px;}
+input[type=text][readonly]{background:var(--accent-light);font-weight:700;letter-spacing:1px;color:var(--accent);cursor:default;}
 .section-title{font-size:19px;font-weight:700;color:var(--accent);margin:28px 0 6px;border-bottom:2px solid var(--accent-light);padding-bottom:6px;}
 .section-note{color:var(--muted);font-size:13.5px;margin-bottom:16px;}
 .group-header{font-size:15px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:8px 12px;border-radius:6px;margin:22px 0 10px;}
@@ -45,6 +46,8 @@ label.lopt input{width:20px;height:20px;}
 .submit-btn{width:100%;background:var(--accent);color:#fff;border:none;padding:16px;font-size:17px;font-weight:700;border-radius:8px;cursor:pointer;margin-top:24px;}
 .submit-btn:hover{filter:brightness(1.1);}
 .result{display:none;background:var(--card);border:2px solid var(--good);border-radius:8px;padding:20px;margin-top:20px;}
+.status-ok{color:var(--good);}
+.status-warn{color:#B0740A;}
 .result h2{color:var(--good);font-size:19px;margin:0 0 10px;}
 textarea{width:100%;height:200px;font-family:monospace;font-size:12px;padding:10px;border:1px solid var(--border);border-radius:6px;}
 .btn-row{display:flex;gap:10px;margin-top:10px;}
@@ -65,8 +68,9 @@ textarea{width:100%;height:200px;font-family:monospace;font-size:12px;padding:10
   <h1>A Few Questions About You</h1>
   <div class="sub">This is a self-reflection questionnaire, not a psychological test or diagnosis of any kind.</div>
 
-  <form id="bafForm" name="baf-respondent" data-netlify="true">
-  <input type="hidden" name="form-name" value="baf-respondent" />
+  <form id="bafForm" name="baf-respondent" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+  <input type="hidden" name="form-name" value="baf-respondent">
+  <p style="display:none;"><label>Don't fill this out if you're human: <input name="bot-field"></label></p>
   <div class="intro">
     <p>There are no right or wrong answers here — just answer honestly, based on how things actually are for you, not how you'd like them to be.</p>
     <p>This is completely voluntary. You can stop at any time. Your answers are scored by a simple rules-based tool, not reviewed by a person.</p>
@@ -77,9 +81,10 @@ textarea{width:100%;height:200px;font-family:monospace;font-size:12px;padding:10
     </div>
   </div>
 
-  <label class="field">Respondent code (ask your administrator what to use — do not use your real name)
-    <input type="text" id="respondentCode" placeholder="e.g. R-0001">
-  </label>
+  <div class="field">
+    <span>Your respondent code (generated automatically — this keeps your answers anonymous. No need to write it down unless your administrator asks you to.)</span>
+    <input type="text" id="respondentCode" readonly>
+  </div>
     <div class="section-title">Part 1 — About You, Right Now</div>
     <div class="section-note">For each pair below, pick the number that best fits you — 1 if you strongly lean toward the left description, 5 if you strongly lean toward the right, or anywhere in between.</div>
     
@@ -932,7 +937,8 @@ like&rdquo;</div>
 
   <div class="result" id="result">
     <h2>Thank you — that's everything.</h2>
-    <p style="font-size:14px;">Your answers are shown below as data your administrator will use. You can close this page, or use the buttons to copy/download it for them.</p>
+    <p id="submitStatus" style="font-weight:600;font-size:14.5px;"></p>
+    <p style="font-size:13px;color:var(--muted);">Your answers are also shown below as a backup copy. You can close this page.</p>
     <textarea id="output" readonly></textarea>
     <div class="btn-row">
       <button type="button" id="copyBtn">Copy to Clipboard</button>
@@ -944,6 +950,18 @@ like&rdquo;</div>
 <script>
 const SUB_IDS = ["terrain", "climate", "density", "energy", "health", "age", "nutrition", "temperament", "cognitive_style", "parenting", "birthorder", "stability", "attachment_style", "past_failures", "ace", "collectivism", "tradition", "density_net", "digital_ratio", "social_comparison", "relationship_conflict", "social_exclusion", "loneliness", "current_stability", "formative_scarcity", "time_pressure", "education", "schema_flex", "cognitive_overload", "decision_fatigue", "anchoring_framing", "sunk_cost", "availability_heuristic", "info_overload", "grief", "life_transitions", "ego", "stress", "sleep", "dehydration", "hormonal", "substance_state", "depression", "fear_failure", "emotional_trauma", "anger_resentment", "shame", "core_values"];
 const DIMS = ["RT", "SC", "ER", "AR", "DS", "SR"];
+
+// Auto-generate a random respondent code on load -- no coordination needed,
+// no risk of two people picking the same one, nothing for the respondent to
+// type or remember incorrectly. Format: R- + 6 random base36 chars, which
+// gives 36^6 (~2.1 billion) possibilities -- effectively zero collision risk
+// at the scale this form is meant for.
+(function() {
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let code = 'R-';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById('respondentCode').value = code;
+})();
 
 const form = document.getElementById('bafForm');
 const allRadioNames = ['consent', ...DIMS.map(d=>'baseline_'+d), ...SUB_IDS.flatMap(id=>[id+'_pick', id+'_slider'])];
@@ -963,7 +981,7 @@ function updateProgress(){
 form.addEventListener('change', updateProgress);
 updateProgress();
 
-form.addEventListener('submit', function(e){
+form.addEventListener('submit', async function(e){
   e.preventDefault();
   const consent = form.querySelector('input[name="consent"]:checked');
   if(!consent || consent.value !== 'yes'){
@@ -994,7 +1012,7 @@ form.addEventListener('submit', function(e){
     answers[id+'_slider'] = Number(form.querySelector(`input[name="${id}_slider"]:checked`).value);
   });
 
-  const respondentCode = document.getElementById('respondentCode').value.trim() || 'UNSPECIFIED';
+  const respondentCode = document.getElementById('respondentCode').value;
   const payload = {
     respondent_code: respondentCode,
     date: new Date().toISOString().slice(0,10),
@@ -1003,9 +1021,45 @@ form.addEventListener('submit', function(e){
   };
   const json = JSON.stringify(payload, null, 2);
   document.getElementById('output').value = json;
+
+  // Submit to Netlify Forms in the background so the administrator gets this
+  // automatically -- no action needed from the respondent beyond clicking Submit.
+  // Copy/Download stay available below as a fallback in case this fails.
+  const submitBtn = form.querySelector('.submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  let autoSubmitOk = false;
+  try {
+    const body = new URLSearchParams({
+      'form-name': 'baf-respondent',
+      'respondent_code': respondentCode,
+      'date': payload.date,
+      'baseline_json': JSON.stringify(baseline),
+      'answers_json': JSON.stringify(answers),
+    }).toString();
+    const resp = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body,
+    });
+    autoSubmitOk = resp.ok;
+  } catch (err) {
+    autoSubmitOk = false;
+  }
+
   document.getElementById('result').style.display = 'block';
   form.style.display = 'none';
   document.querySelector('.progress-bar').style.display = 'none';
+
+  const statusEl = document.getElementById('submitStatus');
+  if (autoSubmitOk) {
+    statusEl.textContent = '✓ Your answers were recorded automatically. You do not need to do anything else.';
+    statusEl.className = 'status-ok';
+  } else {
+    statusEl.textContent = '⚠ Automatic submission did not go through (you may be offline). Please use Copy or Download below and send the result to your administrator directly.';
+    statusEl.className = 'status-warn';
+  }
+
   document.getElementById('result').scrollIntoView({behavior:'smooth'});
 
   document.getElementById('copyBtn').onclick = () => {
