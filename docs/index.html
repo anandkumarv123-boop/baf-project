@@ -70,6 +70,10 @@ textarea{width:100%;height:200px;font-family:monospace;font-size:12px;padding:10
 
   <form id="bafForm" name="baf-respondent" method="POST" data-netlify="true" netlify-honeypot="bot-field">
   <input type="hidden" name="form-name" value="baf-respondent">
+  <input type="hidden" name="respondent_code" id="nf-respondent_code">
+  <input type="hidden" name="date" id="nf-date">
+  <input type="hidden" name="baseline_json" id="nf-baseline_json">
+  <input type="hidden" name="answers_json" id="nf-answers_json">
   <p style="display:none;"><label>Don't fill this out if you're human: <input name="bot-field"></label></p>
   <div class="intro">
     <p>There are no right or wrong answers here — just answer honestly, based on how things actually are for you, not how you'd like them to be.</p>
@@ -1028,6 +1032,10 @@ form.addEventListener('submit', async function(e){
   const submitBtn = form.querySelector('.submit-btn');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
+  document.getElementById('nf-respondent_code').value = respondentCode;
+  document.getElementById('nf-date').value = payload.date;
+  document.getElementById('nf-baseline_json').value = JSON.stringify(baseline);
+  document.getElementById('nf-answers_json').value = JSON.stringify(answers);
   let autoSubmitOk = false;
   try {
     const body = new URLSearchParams({
