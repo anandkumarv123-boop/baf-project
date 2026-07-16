@@ -83,7 +83,9 @@ const SCENARIOS = [
       { id: 'reduce-costs', label: 'Reduce Costs', direction: v(-1, 0, 0, 0, 1, 1) },
       { id: 'raise-funding', label: 'Raise Funding', direction: v(1, 0, 0, 0, 1, 0) },
       { id: 'pivot', label: 'Pivot', direction: v(1, 0, 0, 0, 1, 1) },
-      { id: 'close-business', label: 'Close the Business', direction: v(-1, 0, 0, 0, 0, -1) },
+      // RT:0, not -1 -- shutting down after losing the core client reads as loss
+      // acceptance/capitulation, not a risk-tolerance signal either way.
+      { id: 'close-business', label: 'Close the Business', direction: v(0, 0, 0, 0, 0, -1) },
       { id: 'ignore', label: 'Ignore', direction: v(0, 0, -1, 0, -1, -1) },
     ],
   },
@@ -105,7 +107,9 @@ const SCENARIOS = [
       { id: 'take-guaranteed', label: 'Take the Guaranteed Amount', direction: v(-1, 0, 0, 0, 0, 0) },
       { id: 'take-gamble', label: 'Take the Gamble', direction: v(1, 0, 0, 0, 0, 0) },
       { id: 'ask-for-more-time', label: 'Ask for More Time/Information', direction: v(0, 0, 0, 0, -1, 0) },
-      { id: 'decline-both', label: 'Decline Both / Walk Away', direction: v(-1, 0, 0, 0, 1, 0) },
+      // RT:0, not -1 -- refusing the guaranteed payout too is a rejection of the whole
+      // frame, not the same risk-averse posture as 'take-guaranteed'.
+      { id: 'decline-both', label: 'Decline Both / Walk Away', direction: v(0, 0, 0, 0, 1, 0) },
     ],
   },
   {
