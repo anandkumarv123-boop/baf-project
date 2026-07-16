@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T14:34:12.671Z",
+  "generatedAt": "2026-07-16T20:52:36.763Z",
   "engineVersion": "v6.3",
   "totalProfiles": 15,
   "profiles": [
@@ -16,7 +16,7 @@
       },
       "completeness": 0,
       "answeredSubsTotal": 0,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -31,9 +31,9 @@
         "DS": 0,
         "SR": 0.3333333333333333
       },
-      "completeness": 0.06382978723404255,
+      "completeness": 0.0625,
       "answeredSubsTotal": 3,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -48,9 +48,9 @@
         "DS": -0.6666666666666666,
         "SR": -1.6666666666666667
       },
-      "completeness": 0.06382978723404255,
+      "completeness": 0.0625,
       "answeredSubsTotal": 3,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -65,9 +65,9 @@
         "DS": -0.9,
         "SR": -1.1
       },
-      "completeness": 0.02127659574468085,
+      "completeness": 0.020833333333333332,
       "answeredSubsTotal": 1,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -82,9 +82,9 @@
         "DS": -0.7,
         "SR": -1
       },
-      "completeness": 0.0425531914893617,
+      "completeness": 0.041666666666666664,
       "answeredSubsTotal": 2,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -100,8 +100,8 @@
         "SR": -0.066
       },
       "completeness": 1,
-      "answeredSubsTotal": 47,
-      "totalSubs": 47,
+      "answeredSubsTotal": 48,
+      "totalSubs": 48,
       "subacuteStale": true,
       "staleSubacuteSubs": [
         "grief",
@@ -120,8 +120,8 @@
         "SR": 0
       },
       "completeness": 1,
-      "answeredSubsTotal": 47,
-      "totalSubs": 47,
+      "answeredSubsTotal": 48,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -129,16 +129,16 @@
       "id": "all-max-full",
       "description": "100% completeness, every sub-layer at +2 on every dimension. Boundary case: must score exactly +2 on every dimension.",
       "finalVec": {
-        "RT": 2,
-        "SC": 2,
-        "ER": 2,
-        "AR": 2,
-        "DS": 2,
-        "SR": 2
+        "RT": 1.9544099999999998,
+        "SC": 1.9544099999999998,
+        "ER": 1.9544099999999998,
+        "AR": 1.9544099999999998,
+        "DS": 1.9544099999999998,
+        "SR": 1.9544099999999998
       },
       "completeness": 1,
-      "answeredSubsTotal": 47,
-      "totalSubs": 47,
+      "answeredSubsTotal": 48,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -153,9 +153,9 @@
         "DS": -0.5624113475177306,
         "SR": -0.6379432624113476
       },
-      "completeness": 0.19148936170212766,
+      "completeness": 0.1875,
       "answeredSubsTotal": 9,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -170,9 +170,9 @@
         "DS": -1.059851202338249,
         "SR": -1.5508303440945927
       },
-      "completeness": 0.2127659574468085,
+      "completeness": 0.20833333333333334,
       "answeredSubsTotal": 10,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -187,9 +187,9 @@
         "DS": 0.7891666666666666,
         "SR": 0.81575
       },
-      "completeness": 0.5106382978723404,
+      "completeness": 0.5,
       "answeredSubsTotal": 24,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -197,16 +197,16 @@
       "id": "balanced-40pct-anxious-depleted",
       "description": "~40% completeness (19/47 subs), an \"anxious, depleted\" persona weighted toward modulator/family negatives, includes stale Tier S.",
       "finalVec": {
-        "RT": -0.6623294679399725,
-        "SC": 0.4392735334242837,
-        "ER": 1.2752472714870393,
-        "AR": 0.4755286493860845,
-        "DS": -0.9769440654843109,
-        "SR": -1.277532401091405
+        "RT": -0.6190484311050477,
+        "SC": 0.43566678035470663,
+        "ER": 1.1850784447476124,
+        "AR": 0.47071964529331506,
+        "DS": -0.9312585266030012,
+        "SR": -1.189768076398363
       },
-      "completeness": 0.40425531914893614,
+      "completeness": 0.3958333333333333,
       "answeredSubsTotal": 19,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": true,
       "staleSubacuteSubs": [
         "grief"
@@ -223,9 +223,9 @@
         "DS": 0,
         "SR": 0
       },
-      "completeness": 0.1276595744680851,
+      "completeness": 0.125,
       "answeredSubsTotal": 6,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -233,16 +233,16 @@
       "id": "full-100pct-mixed-realistic",
       "description": "100% completeness, all 47 subs answered with a realistic mixed persona (not all-zero/all-max), including fresh Tier S.",
       "finalVec": {
-        "RT": -0.07809583333333332,
-        "SC": -0.024744999999999996,
-        "ER": 0.06247666666666667,
-        "AR": -0.016496666666666666,
-        "DS": 0.04124166666666666,
-        "SR": -0.09371499999999996
+        "RT": -0.09301999999999998,
+        "SC": -0.0313725,
+        "ER": 0.07441600000000001,
+        "AR": -0.020914999999999996,
+        "DS": 0.052287499999999994,
+        "SR": -0.11162399999999997
       },
       "completeness": 1,
-      "answeredSubsTotal": 47,
-      "totalSubs": 47,
+      "answeredSubsTotal": 48,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     },
@@ -257,9 +257,9 @@
         "DS": 1.5348837209302322,
         "SR": -1.5348837209302322
       },
-      "completeness": 0.06382978723404255,
+      "completeness": 0.0625,
       "answeredSubsTotal": 3,
-      "totalSubs": 47,
+      "totalSubs": 48,
       "subacuteStale": false,
       "staleSubacuteSubs": []
     }
