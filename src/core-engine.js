@@ -121,6 +121,7 @@ const ALL_LAYER_IDS = [...Object.keys(LAYER_WEIGHTS), 'subacute'];
 // them. Their overlap remains a documented risk only (see their titles and Architecture
 // 3.2b.1), not a scoring change; a real fix for a cross-layer correlated pair would need
 // its own design, comparable in scope to Tier S above, not a reuse of this one.
+const SAME_LAYER_PAIR_WEIGHT = 0.5;  // fold weight for CORRELATED_PAIRS members; documented in docs/WEIGHTS.md
 const CORRELATED_PAIRS = [
   ['attachment_style', 'parenting'],
 ];
@@ -136,7 +137,7 @@ function layerRollupVectors(subIds, subScores) {
     if (!subIds.includes(a) || !subIds.includes(b)) return; // pair not both in this layer
     if (subScores[a] === null || subScores[b] === null) return; // dampener needs both answered
     const combined = {};
-    DIMS.forEach(k => { combined[k] = (subScores[a][k] + subScores[b][k]) / 2; });
+    DIMS.forEach(k => { combined[k] = subScores[a][k]*SAME_LAYER_PAIR_WEIGHT + subScores[b][k]*SAME_LAYER_PAIR_WEIGHT; });
     vectors.push(combined);
     folded.add(a); folded.add(b);
   });
@@ -288,5 +289,5 @@ function computeEngine({precisionVectors={}, microVectors={}, subacuteTimestamps
 module.exports = {
   DIMS, zeroVec, scaleVec, LAYER_WEIGHTS, SUB_TO_LAYER, ALL_SUB_IDS, ALL_LAYER_IDS,
   LAYER_SUB_COUNT, SUBACUTE_WEIGHT, SUBACUTE_EXPIRY_DAYS, CORRELATED_PAIRS,
-  CROSS_LAYER_PAIRS, CROSS_LAYER_DISCOUNT, subScoreFrom, computeEngine,
+  SAME_LAYER_PAIR_WEIGHT, CROSS_LAYER_PAIRS, CROSS_LAYER_DISCOUNT, subScoreFrom, computeEngine,
 };

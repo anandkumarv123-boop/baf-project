@@ -42,17 +42,20 @@ Not yet tagged per the follow-up plan (axiomatic / construct-derived / empirical
 | Symbol | Value | File:Line | Type |
 |---|---|---|---|
 | Same-layer dampener fold (`CORRELATED_PAIRS`) | `['attachment_style', 'parenting']` | core-engine.js:124-126 | Constant (list) |
-| Same-layer dampener strength (implicit) | 0.5 per member (average of 2 → each counts at 50% within its folded slot) | core-engine.js:138-139 (mechanism), no named constant | Computed (implicit in averaging, not a stored `λ`) |
+| `SAME_LAYER_PAIR_WEIGHT` (same-layer dampener strength) | 0.5 per member (each counts at 50% within its folded slot) | core-engine.js:124 (constant), 138-139 (use) | Constant |
 | `CROSS_LAYER_DISCOUNT` (cross-layer dampener `λ`) | 0.5 | core-engine.js:179 | Constant |
 | Cross-layer dampener pairs (`CROSS_LAYER_PAIRS`) | `['emotional_trauma', 'stability']` | core-engine.js:180-182 | Constant (list) |
 | `applyCrossLayerDampener` scaling | `scaleVec(subScores[a], CROSS_LAYER_DISCOUNT)` / same for `b` | core-engine.js:195-196 | Computed |
 
 Notes:
 - There is **no continuous correlation coefficient `ρ_ℓk`** anywhere in this file. Both dampeners are binary/structural: a pair is either on a fixed list (fully dampened when both members are answered) or absent (undampened). No graduated correlation strength is modeled or estimated from data.
-- The same-layer mechanism (`layerRollupVectors`, core-engine.js:132-148) has no explicit strength constant — the 0.5-per-member effect is an artifact of averaging two vectors into one slot, not a tunable value.
-- `CROSS_LAYER_DISCOUNT = 0.5` was explicitly chosen (comment, core-engine.js:165-174) to match that implicit same-layer 0.5, and is described in the comment as a "neutral, symmetric prior," not derived from any citation or effect-size estimate.
+- The same-layer mechanism (`layerRollupVectors`, core-engine.js:132-148) now uses the named `SAME_LAYER_PAIR_WEIGHT` constant instead of an inline magic number — a behavior-neutral rename (0.5-per-member effect is unchanged), not a tunable value with any independent justification of its own.
+- `CROSS_LAYER_DISCOUNT = 0.5` was explicitly chosen (comment, core-engine.js:165-174) to match what `SAME_LAYER_PAIR_WEIGHT` already does to each pair member, and is described in the comment as a "neutral, symmetric prior," not derived from any citation or effect-size estimate.
 - Both mechanisms are all-or-nothing per pair: if only one member of a pair is answered, no dampening applies to either (core-engine.js:136-137, 194).
 
-## Related, out of scope for "weights" but adjacent
+## (d) Threshold constants
 
-- `SUBACUTE_EXPIRY_DAYS = 35` (core-engine.js:44) — a staleness threshold, not a weight; informational-only, does not affect `finalVec`.
+| Symbol | Value | File:Line | Wired into scoring | Tag |
+|---|---|---|---|---|
+| `NEUTRAL_EPSILON` | 0.05 | scripts/consistency-check.js:15 | Yes — `checkConsistency` is imported and used live in `src/server.js:16` | |
+| `SUBACUTE_EXPIRY_DAYS` | 35 | core-engine.js:44 | a staleness threshold, not a weight; informational-only, does not affect `finalVec` | |
