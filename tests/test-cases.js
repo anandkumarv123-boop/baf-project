@@ -1,7 +1,7 @@
 const {
   computeEngine, LAYER_WEIGHTS, ALL_SUB_IDS, SUBACUTE_WEIGHT, SUBACUTE_EXPIRY_DAYS,
   DIMS, CROSS_LAYER_DISCOUNT,
-} = require('./core-engine');
+} = require('../src/core-engine');
 
 const TOTAL = ALL_SUB_IDS.length; // 48 as of v6.5 (47 v6.3, 46 pre-v6.3, 22 pre-v6.1, 20 pre-v6)
 const TOL = 0.001;
@@ -59,7 +59,7 @@ function check(name, actual, expected, meta){
 // TC5 — every sub-layer answered with zero vector -> final zero, 100% complete
 {
   const pv = {};
-  require('./core-engine').ALL_SUB_IDS.forEach(id=> pv[id]={RT:0,SC:0,ER:0,AR:0,DS:0,SR:0});
+  require('../src/core-engine').ALL_SUB_IDS.forEach(id=> pv[id]={RT:0,SC:0,ER:0,AR:0,DS:0,SR:0});
   const r = computeEngine({precisionVectors:pv});
   check('TC5 all-zero full run -> zero vector, 100% complete', r.finalVec, {RT:0,SC:0,ER:0,AR:0,DS:0,SR:0});
   check('TC5b completeness = 1.0', {c:r.completeness}, {c:1.0});
@@ -75,7 +75,7 @@ function check(name, actual, expected, meta){
 // this stays re-derivable if any of those constants ever change.
 {
   const pv = {};
-  require('./core-engine').ALL_SUB_IDS.forEach(id=> pv[id]={RT:2,SC:2,ER:2,AR:2,DS:2,SR:2});
+  require('../src/core-engine').ALL_SUB_IDS.forEach(id=> pv[id]={RT:2,SC:2,ER:2,AR:2,DS:2,SR:2});
   const r = computeEngine({precisionVectors:pv});
 
   const shrink = 1 - SUBACUTE_WEIGHT;
