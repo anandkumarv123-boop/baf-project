@@ -1,6 +1,6 @@
 {
   "name": "baf-engine-server",
-  "version": "6.0.0",
+  "version": "6.7.0",
   "description": "BAF (Behavioral Algorithm Framework) scoring engine API — implements the API surface from BAF_Technical_Architecture.docx Section 3.5",
   "main": "src/server.js",
   "scripts": {
