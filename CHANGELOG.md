@@ -23,9 +23,11 @@
 - Added `NEUTRAL_EPSILON` (0.05, `scripts/consistency-check.js`) to `docs/WEIGHTS.md`
   threshold section — it is wired into live scoring via `checkConsistency` and had been
   undocumented.
-- Reclassified `SUBACUTE_EXPIRY_DAYS` (35, `src/core-engine.js`) in `docs/WEIGHTS.md` from
-  "adjacent/out of scope" to the threshold section; it is a fresh/stale boundary that
-  changes scoring output.
+- Repositioned `SUBACUTE_EXPIRY_DAYS` (35, `src/core-engine.js`) in `docs/WEIGHTS.md`. It is
+  a staleness flag boundary (informational-only, does not affect `finalVec`); the previous
+  "adjacent/out of scope" placement understated its documented status, but the description
+  of it in the last CHANGELOG entry as "changing scoring output" was wrong and is corrected
+  here.
 - Removed unenforced per-sub-layer tier-ceiling numeric values (0.75 / 1.00 / 1.25 / 1.50 /
   2.00) from 28 sub-layer title strings and from the "honest disclosure" banner in
   `BAF_Simulator_v6.html`. These numbers were documentation text only, not clamped in code,

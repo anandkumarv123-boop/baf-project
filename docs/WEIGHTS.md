@@ -58,4 +58,9 @@ Notes:
 | Symbol | Value | File:Line | Wired into scoring | Tag |
 |---|---|---|---|---|
 | `NEUTRAL_EPSILON` | 0.05 | scripts/consistency-check.js:15 | Yes — `checkConsistency` is imported and used live in `src/server.js:16` | |
+
+## (e) Informational-only staleness flags
+
+| Symbol | Value | File:Line | Wired into scoring | Tag |
+|---|---|---|---|---|
 | `SUBACUTE_EXPIRY_DAYS` | 35 | core-engine.js:44 | a staleness threshold, not a weight; informational-only, does not affect `finalVec` | |
