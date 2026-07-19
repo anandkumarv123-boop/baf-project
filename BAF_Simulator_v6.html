@@ -1,8 +1,17 @@
 <!DOCTYPE html>
+<!--
+  WARNING FOR CONTRIBUTORS: This file re-implements BAF scoring
+  independently of src/core-engine.js. It does NOT include the
+  v6.5 same-layer dampener or the v6.7 cross-layer dampener, and
+  will therefore produce scores that disagree with the API and
+  the test suite for any respondent whose answers trigger those
+  dampeners. Do not use this file to validate engine behavior.
+  Tracking: see CHANGELOG.md "Known limitations" under the 6.7.0 entry.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BAF v6.5 — Confidence-Corrected: 48 Sub-Layers + Tier S, Verified Citations, Precision Mode</title>
+<title>BAF v6.7 Simulator (Preview — Diverges from Production Engine)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
