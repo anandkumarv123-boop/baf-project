@@ -42,9 +42,9 @@ curl -X POST http://localhost:4000/v1/profile \
   }'
 ```
 
-Valid sub-layer ids (22 total): `terrain, climate, density, energy, health, age, nutrition,
-temperament, parenting, birthorder, stability, collectivism, tradition, density_net,
-digital_ratio, current_stability, formative_scarcity, education, schema_flex, ego, stress, sleep`
+Valid sub-layer ids (48 total). Full list: see `ALL_SUB_IDS` in `src/core-engine.js`. The
+enumerated list previously in this section was stale (v6.0-era 22-id snapshot) and has been
+removed pending a re-sync against the current engine.
 
 Each value is a `{RT,SC,ER,AR,DS,SR}` vector, range -2..2 (auto-clamped). `nutrition` is
 capped at 1.00 and `temperament` at 1.25 by the confidence-correction documented in the
@@ -54,10 +54,12 @@ to the global ±2 clamp.
 
 ## Architecture notes
 
-- **Scoring logic** (`src/core-engine.js`) is copied byte-for-byte from the file backing
-  the 85-case regression suite (`tests/test-cases.js`, `tests/core-engine.js`, run via
-  `npm test`) and mirrored in `BAF_Simulator_v6.html`. No math is duplicated or re-derived
-  here — same source, three consumers (test suite, browser tool, this API).
+- **Scoring logic** lives in `src/core-engine.js`, which is the single source of truth for
+  the API and the 103-case regression suite (`tests/test-cases.js`, run via `npm test`).
+  `BAF_Simulator_v6.html` currently re-implements scoring independently and does not include
+  the v6.5 same-layer or v6.7 cross-layer dampeners — it is a known-divergent preview
+  artifact pending replacement with a direct import of `src/core-engine.js`. See CHANGELOG
+  for the tracking entry.
 - **Persistence** (`src/store.js`) is PostgreSQL, per the architecture doc's tech stack
   table (Section 4) and Data Layer schema (Section 3.4). Schema lives in
   `migrations/001_init.sql` (`profiles`, `weight_config`, `sessions`); run new migration

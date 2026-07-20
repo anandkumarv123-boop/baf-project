@@ -1,8 +1,17 @@
 <!DOCTYPE html>
+<!--
+  WARNING FOR CONTRIBUTORS: This file re-implements BAF scoring
+  independently of src/core-engine.js. It does NOT include the
+  v6.5 same-layer dampener or the v6.7 cross-layer dampener, and
+  will therefore produce scores that disagree with the API and
+  the test suite for any respondent whose answers trigger those
+  dampeners. Do not use this file to validate engine behavior.
+  Tracking: see CHANGELOG.md "Known limitations" under the 6.7.0 entry.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BAF v6.5 — Confidence-Corrected: 48 Sub-Layers + Tier S, Verified Citations, Precision Mode</title>
+<title>BAF v6.7 Simulator (Preview — Diverges from Production Engine)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
@@ -108,7 +117,7 @@ table.trace td.num{font-family:'JetBrains Mono',monospace;color:var(--muted);}
       <span>TIER 2 · <b>8 layers + Tier S</b></span>
       <span>TIER 3 · <b>1 macro score</b></span>
     </div>
-    <div class="honest">Straight talk: more granularity = better resolution and full traceability, not certainty. This still self-reports on a heuristic framework, not a validated instrument — precision in the math doesn't create precision in human behavior. v6 added 2 sub-layers (Nutrition, Temperament) whose weight ceilings were deliberately reduced below the source paper's implied tier, because independent fact-checking found their supporting citations contested (Danziger 2011) or methodologically split (twin- vs. molecular-genetic heritability) — see Architecture doc Section 3.2b.4. v6.1 added 24 more sub-layers filling every remaining "Not yet implemented" row of that catalogue (excluding Domain 6's protected-attribute rows, which stay deliberately excluded per Section 6). v6.2 gave two of those — Grief and Major life transitions — a proper home: Tier S (Subacute), a 4th scoring tier sitting between the structural layers and the Modulator, matching the timing band (weeks-months) the source paper's Section 3.8.10.9 describes but v5/v6.1's architecture didn't yet model (Section 3.2b.2). Tier S reserves a fixed, undiluted 6% of the score when answered (re-normalized proportionally against the 8 layers above) and flags its own data stale after 35 days — informational only, it keeps counting toward the score even when stale. v6.3 adds Childhood Adversity (ACEs, Felitti et al. 1998) as its own Family & Upbringing sub-layer, at its full HIGH (1.50) weight — unlike Nutrition/Temperament, this citation was independently confirmed as accurate and one of the best-replicated effects in the whole catalogue, so its weight was not reduced. Treat the final score as a structured mirror, not a verdict.</div>
+    <div class="honest">Straight talk: more granularity = better resolution and full traceability, not certainty. This still self-reports on a heuristic framework, not a validated instrument — precision in the math doesn't create precision in human behavior. v6 added 2 sub-layers (Nutrition, Temperament) whose weight ceilings were deliberately reduced below the source paper's implied tier, because independent fact-checking found their supporting citations contested (Danziger 2011) or methodologically split (twin- vs. molecular-genetic heritability) — see Architecture doc Section 3.2b.4. v6.1 added 24 more sub-layers filling every remaining "Not yet implemented" row of that catalogue (excluding Domain 6's protected-attribute rows, which stay deliberately excluded per Section 6). v6.2 gave two of those — Grief and Major life transitions — a proper home: Tier S (Subacute), a 4th scoring tier sitting between the structural layers and the Modulator, matching the timing band (weeks-months) the source paper's Section 3.8.10.9 describes but v5/v6.1's architecture didn't yet model (Section 3.2b.2). Tier S reserves a fixed, undiluted 6% of the score when answered (re-normalized proportionally against the 8 layers above) and flags its own data stale after 35 days — informational only, it keeps counting toward the score even when stale. v6.3 adds Childhood Adversity (ACEs, Felitti et al. 1998) as its own Family & Upbringing sub-layer, at its full HIGH weight — unlike Nutrition/Temperament, this citation was independently confirmed as accurate and one of the best-replicated effects in the whole catalogue, so its weight was not reduced. Treat the final score as a structured mirror, not a verdict.</div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
       <button class="cta" onclick="document.getElementById('stage').scrollIntoView({behavior:'smooth'})">Run the engine ↓</button>
       <button class="cta" id="precisionToggle" style="background:transparent;color:var(--teal);border:1px solid var(--teal);">Switch to Precision Test Mode</button>
@@ -213,7 +222,7 @@ const LAYERS = [
       ]},
       {id:'age_slider', type:'slider', prompt:'I feel my life stage makes me more deliberate than impulsive', v:{RT:-1,SC:0,ER:-0.5,AR:0.5,DS:0.5,SR:0.5}},
     ]},
-    { id:'nutrition', title:'Nutrition / blood sugar state (v6 -- confidence-corrected 1.00 ceiling, see Architecture 3.2b.4)', micro:[
+    { id:'nutrition', title:'Nutrition / blood sugar state (v6 -- see Architecture 3.2b.4)', micro:[
       {id:'nutrition_pick', type:'select', options:[
         {name:'Just eaten, blood sugar stable', v:{RT:0.3,SC:0,ER:-0.5,AR:0,DS:0.5,SR:0.5}},
         {name:'A few hours since eating, mild hunger', v:{RT:0,SC:0,ER:0.3,AR:0,DS:-0.2,SR:-0.2}},
@@ -221,7 +230,7 @@ const LAYERS = [
       ]},
       {id:'nutrition_slider', type:'slider', prompt:'Hunger or low blood sugar noticeably affects my mood and choices', v:{RT:-0.5,SC:0,ER:0.7,AR:0.3,DS:-0.5,SR:-0.7}},
     ]},
-    { id:'temperament', title:'Inborn temperament (v6 -- confidence-corrected 1.25 ceiling, see Architecture 3.2b.4)', micro:[
+    { id:'temperament', title:'Inborn temperament (v6 -- see Architecture 3.2b.4)', micro:[
       {id:'temperament_pick', type:'select', options:[
         {name:'High reactivity / sensitive temperament', v:{RT:-0.5,SC:0.3,ER:1.25,AR:0.3,DS:-0.5,SR:-1.0}},
         {name:'Even-keeled / low-reactivity temperament', v:{RT:0.5,SC:-0.3,ER:-1.25,AR:-0.3,DS:0.5,SR:1.0}},
@@ -229,7 +238,7 @@ const LAYERS = [
       ]},
       {id:'temperament_slider', type:'slider', prompt:"Even under similar circumstances, I've always reacted more intensely than people around me", v:{RT:-0.3,SC:0.2,ER:1.0,AR:0.2,DS:-0.3,SR:-0.8}},
     ]},
-    { id:'cognitive_style', title:'Cognitive style, analytical vs. intuitive (v6.1 -- HIGH tier ceiling 1.50, maps directly to Decision-Style; Kahneman 2011 System 1/2, see Architecture 3.2b.1 Domain 8)', micro:[
+    { id:'cognitive_style', title:'Cognitive style, analytical vs. intuitive (v6.1 -- maps directly to Decision-Style; Kahneman 2011 System 1/2, see Architecture 3.2b.1 Domain 8)', micro:[
       {id:'cognitive_style_pick', type:'select', options:[
         {name:'Strongly analytical / deliberate (System 2 dominant)', v:{RT:-0.3,SC:-0.2,ER:-0.3,AR:-0.2,DS:1.5,SR:0.4}},
         {name:'Balanced / context-dependent', v:zeroVec()},
@@ -265,7 +274,7 @@ const LAYERS = [
       ]},
       {id:'stability_slider', type:'slider', prompt:'Sudden disruption rattles me more than it should', v:{RT:-0.5,SC:0,ER:1.5,AR:0,DS:-0.5,SR:-1.5}},
     ]},
-    { id:'attachment_style', title:'Childhood attachment style (v6.1 -- HIGH tier ceiling 1.50, split out as its own sub-layer per Architecture 3.2b.1 Domain 7; overlaps "parenting" -- treat jointly with care to avoid double-counting)', micro:[
+    { id:'attachment_style', title:'Childhood attachment style (v6.1 -- split out as its own sub-layer per Architecture 3.2b.1 Domain 7; overlaps "parenting" -- treat jointly with care to avoid double-counting)', micro:[
       {id:'attachment_style_pick', type:'select', options:[
         {name:'Secure (comfortable with closeness and independence)', v:{RT:0.5,SC:0,ER:-0.5,AR:-0.2,DS:0.8,SR:1.2}},
         {name:'Anxious (craves closeness, fears abandonment)', v:{RT:-0.5,SC:0.8,ER:1.3,AR:0.5,DS:-0.9,SR:-1.2}},
@@ -273,7 +282,7 @@ const LAYERS = [
       ]},
       {id:'attachment_style_slider', type:'slider', prompt:'In close relationships, I tend to worry about being abandoned or I rely heavily on distance to feel safe', v:{RT:-0.3,SC:0.5,ER:1.0,AR:0.3,DS:-0.6,SR:-1.0}},
     ]},
-    { id:'past_failures', title:'Significant past failures and successes (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 7)', micro:[
+    { id:'past_failures', title:'Significant past failures and successes (v6.1 -- see Architecture 3.2b.1 Domain 7)', micro:[
       {id:'past_failures_pick', type:'select', options:[
         {name:"Past failures/successes feel processed, don't dominate outlook", v:{RT:0.3,SC:-0.1,ER:-0.2,AR:-0.1,DS:0.5,SR:0.7}},
         {name:'Some past events still shape current confidence somewhat', v:{RT:-0.2,SC:0.2,ER:0.4,AR:0.2,DS:-0.3,SR:-0.3}},
@@ -281,7 +290,7 @@ const LAYERS = [
       ]},
       {id:'past_failures_slider', type:'slider', prompt:'A significant past success or failure still strongly shapes how I approach similar situations today', v:{RT:-0.5,SC:0.3,ER:0.7,AR:0.3,DS:-0.8,SR:-1.4}},
     ]},
-    { id:'ace', title:'Childhood adversity / trauma — ACEs (v6.3 -- HIGH tier ceiling 1.50, confidence-confirmed 1.00x -- Felitti et al. 1998 dose-response independently verified as one of the best-replicated effects in the catalogue, see Architecture 3.2b.1 Domain 7 / 3.2b.4; overlaps "stability" sub -- treat jointly with care to avoid double-counting)', micro:[
+    { id:'ace', title:'Childhood adversity / trauma — ACEs (v6.3 -- confidence-confirmed 1.00x -- Felitti et al. 1998 dose-response independently verified as one of the best-replicated effects in the catalogue, see Architecture 3.2b.1 Domain 7 / 3.2b.4; overlaps "stability" sub -- treat jointly with care to avoid double-counting)', micro:[
       {id:'ace_pick', type:'select', options:[
         {name:'Low / no significant childhood adversity (0-1 ACEs)', v:{RT:0.2,SC:0,ER:-0.3,AR:0,DS:0.3,SR:0.8}},
         {name:'Moderate childhood adversity (2-3 ACEs)', v:{RT:-0.3,SC:0.3,ER:0.8,AR:0.3,DS:-0.5,SR:-0.9}},
@@ -327,7 +336,7 @@ const LAYERS = [
       ]},
       {id:'digital_ratio_slider', type:'slider', prompt:'Online interactions affect my mood more than in-person ones', v:{RT:0,SC:0,ER:1.5,AR:-0.5,DS:0,SR:-1}},
     ]},
-    { id:'social_comparison', title:'Social comparison / competitive pressure (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 4)', micro:[
+    { id:'social_comparison', title:'Social comparison / competitive pressure (v6.1 -- see Architecture 3.2b.1 Domain 4)', micro:[
       {id:'social_comparison_pick', type:'select', options:[
         {name:'Rarely compares self to others', v:{RT:0.3,SC:-0.4,ER:-0.2,AR:-0.2,DS:0.5,SR:0.4}},
         {name:'Occasionally compares, mild competitive pull', v:{RT:0,SC:0.4,ER:0.3,AR:0.2,DS:-0.2,SR:-0.2}},
@@ -335,7 +344,7 @@ const LAYERS = [
       ]},
       {id:'social_comparison_slider', type:'slider', prompt:'Seeing how others are doing compared to me strongly affects my mood and choices', v:{RT:-0.2,SC:0.9,ER:0.7,AR:0.4,DS:-0.5,SR:-0.9}},
     ]},
-    { id:'relationship_conflict', title:'Relationship conflict — domestic/professional/familial (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 4)', micro:[
+    { id:'relationship_conflict', title:'Relationship conflict — domestic/professional/familial (v6.1 -- see Architecture 3.2b.1 Domain 4)', micro:[
       {id:'relationship_conflict_pick', type:'select', options:[
         {name:'Currently low conflict in close relationships', v:{RT:0.2,SC:-0.1,ER:-0.2,AR:-0.1,DS:0.3,SR:0.4}},
         {name:'Some ongoing tension in a close relationship', v:{RT:-0.2,SC:0.3,ER:0.5,AR:0.3,DS:-0.3,SR:-0.4}},
@@ -343,7 +352,7 @@ const LAYERS = [
       ]},
       {id:'relationship_conflict_slider', type:'slider', prompt:'Conflict with someone close to me is currently affecting my mood and focus', v:{RT:-0.4,SC:0.4,ER:1.1,AR:0.4,DS:-0.5,SR:-1.0}},
     ]},
-    { id:'social_exclusion', title:'Social exclusion / rejection (v6.1 -- HIGH tier ceiling 1.50, confidence-confirmed 1.00x -- Eisenberger/Lieberman/Williams 2003 independently verified, see Architecture 3.2b.4)', micro:[
+    { id:'social_exclusion', title:'Social exclusion / rejection (v6.1 -- confidence-confirmed 1.00x -- Eisenberger/Lieberman/Williams 2003 independently verified, see Architecture 3.2b.4)', micro:[
       {id:'social_exclusion_pick', type:'select', options:[
         {name:'Feels consistently included / connected', v:{RT:0.3,SC:0.2,ER:-0.3,AR:-0.1,DS:0.3,SR:0.6}},
         {name:'Occasional feelings of exclusion', v:{RT:-0.2,SC:0.4,ER:0.6,AR:0.3,DS:-0.3,SR:-0.5}},
@@ -351,7 +360,7 @@ const LAYERS = [
       ]},
       {id:'social_exclusion_slider', type:'slider', prompt:"Being excluded or rejected by others affects me more intensely than I'd expect", v:{RT:-0.4,SC:0.5,ER:1.3,AR:0.4,DS:-0.6,SR:-1.1}},
     ]},
-    { id:'loneliness', title:'Loneliness / social isolation (v6.5 -- MODERATE-HIGH tier ceiling 1.25, Cacioppo & Patrick 2008; no confidence-multiplier adjustment -- large physiological/health-mechanism evidence base (cortisol, IL-6 inflammation, HPA-axis, cognitive decline) but no single quantifiable behavioral effect size analogous to Milgram/Asch, see Architecture 3.2b.1 Domain 2 / 3.2b.6. SC direction: positive -- follows the established Domain 4 pattern (social_comparison/social_exclusion above), where heightened social-threat salience raises social-calibration/hypervigilance rather than lowering it; read as conformity-seeking-under-isolation, not reduced social attunement', micro:[
+    { id:'loneliness', title:'Loneliness / social isolation (v6.5 -- Cacioppo & Patrick 2008; no confidence-multiplier adjustment -- large physiological/health-mechanism evidence base (cortisol, IL-6 inflammation, HPA-axis, cognitive decline) but no single quantifiable behavioral effect size analogous to Milgram/Asch, see Architecture 3.2b.1 Domain 2 / 3.2b.6. SC direction: positive -- follows the established Domain 4 pattern (social_comparison/social_exclusion above), where heightened social-threat salience raises social-calibration/hypervigilance rather than lowering it; read as conformity-seeking-under-isolation, not reduced social attunement', micro:[
       {id:'loneliness_pick', type:'select', options:[
         {name:'Rarely feels lonely / feels socially connected', v:{RT:0.2,SC:-0.2,ER:-0.2,AR:-0.1,DS:0.3,SR:0.4}},
         {name:'Occasional feelings of loneliness', v:{RT:-0.2,SC:0.3,ER:0.5,AR:0.2,DS:-0.3,SR:-0.4}},
@@ -377,7 +386,7 @@ const LAYERS = [
       ]},
       {id:'formative_scarcity_slider', type:'slider', prompt:'I still think in scarcity terms even when resources are fine now', v:{RT:-1,SC:0.5,ER:1,AR:0.5,DS:-0.5,SR:-1}},
     ]},
-    { id:'time_pressure', title:'Time pressure (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 5)', micro:[
+    { id:'time_pressure', title:'Time pressure (v6.1 -- see Architecture 3.2b.1 Domain 5)', micro:[
       {id:'time_pressure_pick', type:'select', options:[
         {name:'Rarely feels rushed / plenty of time', v:{RT:-0.3,SC:-0.1,ER:-0.3,AR:-0.2,DS:0.6,SR:0.5}},
         {name:'Occasionally rushed / moderate time pressure', v:{RT:0.2,SC:0.2,ER:0.5,AR:0.3,DS:-0.4,SR:-0.3}},
@@ -404,7 +413,7 @@ const LAYERS = [
       ]},
       {id:'schema_flex_slider', type:'slider', prompt:'I update my beliefs quickly when given new evidence', v:{RT:0.5,SC:0,ER:-0.5,AR:-0.5,DS:1.5,SR:1}},
     ]},
-    { id:'cognitive_overload', title:'Cognitive overload (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+    { id:'cognitive_overload', title:'Cognitive overload (v6.1 -- see Architecture 3.2b.1 Domain 3)', micro:[
       {id:'cognitive_overload_pick', type:'select', options:[
         {name:'Rarely overloaded', v:{RT:0.3,SC:0,ER:-0.2,AR:-0.2,DS:0.7,SR:0.5}},
         {name:'Occasionally overloaded by too much input', v:{RT:-0.3,SC:0.2,ER:0.6,AR:0.3,DS:-0.7,SR:-0.5}},
@@ -412,7 +421,7 @@ const LAYERS = [
       ]},
       {id:'cognitive_overload_slider', type:'slider', prompt:'When I have too much to process at once, my decisions get noticeably worse', v:{RT:-0.6,SC:0.3,ER:1.0,AR:0.5,DS:-1.3,SR:-0.9}},
     ]},
-    { id:'decision_fatigue', title:'Decision fatigue (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+    { id:'decision_fatigue', title:'Decision fatigue (v6.1 -- see Architecture 3.2b.1 Domain 3)', micro:[
       {id:'decision_fatigue_pick', type:'select', options:[
         {name:'Decision quality stays consistent all day', v:{RT:0.3,SC:-0.2,ER:-0.2,AR:-0.2,DS:0.8,SR:0.5}},
         {name:'Some drop-off in decision quality later in the day', v:{RT:-0.2,SC:0.2,ER:0.4,AR:0.3,DS:-0.6,SR:-0.4}},
@@ -420,7 +429,7 @@ const LAYERS = [
       ]},
       {id:'decision_fatigue_slider', type:'slider', prompt:'By the end of a demanding day, I make noticeably worse decisions', v:{RT:-0.4,SC:0.5,ER:0.6,AR:0.8,DS:-1.4,SR:-0.7}},
     ]},
-    { id:'anchoring_framing', title:'Anchoring and framing effects (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 3)', micro:[
+    { id:'anchoring_framing', title:'Anchoring and framing effects (v6.1 -- see Architecture 3.2b.1 Domain 3)', micro:[
       {id:'anchoring_framing_pick', type:'select', options:[
         {name:'Rarely swayed by how something is framed', v:{RT:0.4,SC:-0.2,ER:-0.1,AR:-0.3,DS:0.9,SR:0.3}},
         {name:'Somewhat influenced by framing / first numbers seen', v:{RT:-0.2,SC:0.3,ER:0.2,AR:0.4,DS:-0.6,SR:-0.1}},
@@ -428,7 +437,7 @@ const LAYERS = [
       ]},
       {id:'anchoring_framing_slider', type:'slider', prompt:'The way information is presented to me changes my decision more than it probably should', v:{RT:-0.4,SC:0.5,ER:0.3,AR:0.7,DS:-1.1,SR:-0.2}},
     ]},
-    { id:'sunk_cost', title:'Sunk cost fallacy (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+    { id:'sunk_cost', title:'Sunk cost fallacy (v6.1 -- see Architecture 3.2b.1 Domain 3)', micro:[
       {id:'sunk_cost_pick', type:'select', options:[
         {name:'Cuts losses easily, ignores past investment', v:{RT:0.6,SC:-0.2,ER:-0.2,AR:-0.3,DS:1.0,SR:0.4}},
         {name:'Somewhat reluctant to abandon past investment', v:{RT:-0.3,SC:0.3,ER:0.3,AR:0.3,DS:-0.7,SR:-0.2}},
@@ -436,7 +445,7 @@ const LAYERS = [
       ]},
       {id:'sunk_cost_slider', type:'slider', prompt:"I keep going with something that isn't working because of what I've already put into it", v:{RT:-0.7,SC:0.4,ER:0.5,AR:0.5,DS:-1.4,SR:-0.5}},
     ]},
-    { id:'availability_heuristic', title:'Availability heuristic (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 3)', micro:[
+    { id:'availability_heuristic', title:'Availability heuristic (v6.1 -- see Architecture 3.2b.1 Domain 3)', micro:[
       {id:'availability_heuristic_pick', type:'select', options:[
         {name:'Weighs evidence broadly, not just recent/vivid examples', v:{RT:0.3,SC:-0.2,ER:-0.1,AR:-0.2,DS:0.8,SR:0.3}},
         {name:'Somewhat swayed by recent or vivid examples', v:{RT:-0.2,SC:0.2,ER:0.3,AR:0.2,DS:-0.5,SR:-0.1}},
@@ -444,7 +453,7 @@ const LAYERS = [
       ]},
       {id:'availability_heuristic_slider', type:'slider', prompt:'A recent or memorable example sticks with me more than the overall evidence does', v:{RT:-0.4,SC:0.3,ER:0.4,AR:0.3,DS:-1.1,SR:-0.2}},
     ]},
-    { id:'info_overload', title:'Information overload / analysis paralysis (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 3)', micro:[
+    { id:'info_overload', title:'Information overload / analysis paralysis (v6.1 -- see Architecture 3.2b.1 Domain 3)', micro:[
       {id:'info_overload_pick', type:'select', options:[
         {name:'Comfortable deciding with limited information', v:{RT:0.6,SC:-0.2,ER:-0.2,AR:-0.2,DS:0.9,SR:0.4}},
         {name:"Sometimes stalls when there's too much to weigh", v:{RT:-0.3,SC:0.2,ER:0.4,AR:0.3,DS:-0.7,SR:-0.3}},
@@ -462,7 +471,7 @@ const LAYERS = [
   // informational only, does not exclude it from scoring. Vectors/ceilings unchanged from
   // v6.1; only the owning layer and title wording moved.
   { id:'subacute', title:'Tier S — Subacute Inputs (expires after 35 days, see Architecture 3.2b.2)', weight:0.06, subs:[
-    { id:'grief', title:'Grief and loss — recent bereavement or major loss (v6.2 -- MODERATE-HIGH tier ceiling 1.25, Tier S / Subacute, see Architecture 3.2b.2)', micro:[
+    { id:'grief', title:'Grief and loss — recent bereavement or major loss (v6.2 -- Tier S / Subacute, see Architecture 3.2b.2)', micro:[
       {id:'grief_pick', type:'select', options:[
         {name:'No recent significant loss', v:{RT:0,SC:0,ER:0,AR:0,DS:0,SR:0.2}},
         {name:'Processing a recent loss, functioning mostly intact', v:{RT:-0.4,SC:0.3,ER:0.7,AR:0.2,DS:-0.5,SR:-0.7}},
@@ -470,7 +479,7 @@ const LAYERS = [
       ]},
       {id:'grief_slider', type:'slider', prompt:'A recent loss is still significantly affecting how I think and feel day to day', v:{RT:-0.6,SC:0.3,ER:1.1,AR:0.3,DS:-0.8,SR:-1.0}},
     ]},
-    { id:'life_transitions', title:'Major life transitions — divorce, bereavement, relocation, career change (v6.2 -- MODERATE-HIGH tier ceiling 1.25, Tier S / Subacute, see Architecture 3.2b.2)', micro:[
+    { id:'life_transitions', title:'Major life transitions — divorce, bereavement, relocation, career change (v6.2 -- Tier S / Subacute, see Architecture 3.2b.2)', micro:[
       {id:'life_transitions_pick', type:'select', options:[
         {name:'No major transition currently underway', v:{RT:0,SC:0,ER:-0.1,AR:0,DS:0.1,SR:0.3}},
         {name:'Navigating a moderate life transition', v:{RT:0.3,SC:0.2,ER:0.5,AR:0.2,DS:-0.3,SR:-0.5}},
@@ -504,7 +513,7 @@ const LAYERS = [
       ]},
       {id:'sleep_slider', type:'slider', prompt:'Poor sleep visibly changes how I react to people', v:{RT:0,SC:0,ER:1.5,AR:0,DS:0,SR:-1}},
     ]},
-    { id:'dehydration', title:'Dehydration (v6.1 -- LOW-MODERATE tier ceiling 0.75, see Architecture 3.2b.1 Domain 1)', micro:[
+    { id:'dehydration', title:'Dehydration (v6.1 -- see Architecture 3.2b.1 Domain 1)', micro:[
       {id:'dehydration_pick', type:'select', options:[
         {name:'Well hydrated', v:{RT:0.1,SC:0,ER:-0.2,AR:0,DS:0.2,SR:0.2}},
         {name:'Mild dehydration (thirsty, slight headache)', v:{RT:-0.1,SC:0,ER:0.3,AR:0.1,DS:-0.2,SR:-0.3}},
@@ -512,7 +521,7 @@ const LAYERS = [
       ]},
       {id:'dehydration_slider', type:'slider', prompt:'Not drinking enough water noticeably affects my focus and mood', v:{RT:-0.2,SC:0.1,ER:0.5,AR:0.2,DS:-0.4,SR:-0.75}},
     ]},
-    { id:'hormonal', title:'Hormonal fluctuation — testosterone, estrogen, cortisol, thyroid, insulin (v6.1 -- MODERATE-HIGH tier ceiling 1.25, see Architecture 3.2b.1 Domain 1)', micro:[
+    { id:'hormonal', title:'Hormonal fluctuation — testosterone, estrogen, cortisol, thyroid, insulin (v6.1 -- see Architecture 3.2b.1 Domain 1)', micro:[
       {id:'hormonal_pick', type:'select', options:[
         {name:'Stable / balanced', v:{RT:0.1,SC:0,ER:-0.2,AR:0,DS:0.2,SR:0.3}},
         {name:'Noticeable cyclical fluctuation (mood/energy shifts)', v:{RT:-0.2,SC:0.2,ER:0.7,AR:0.2,DS:-0.4,SR:-0.6}},
@@ -520,7 +529,7 @@ const LAYERS = [
       ]},
       {id:'hormonal_slider', type:'slider', prompt:'Hormonal changes noticeably affect my mood, energy, or decision-making', v:{RT:-0.3,SC:0.2,ER:1.0,AR:0.3,DS:-0.6,SR:-0.8}},
     ]},
-    { id:'substance_state', title:'Alcohol / substance state (v6.1 -- HIGH(acute) tier ceiling 1.50 [acute tier used; MODERATE applies to next-day/chronic state], see Architecture 3.2b.1 Domain 1)', micro:[
+    { id:'substance_state', title:'Alcohol / substance state (v6.1 -- see Architecture 3.2b.1 Domain 1)', micro:[
       {id:'substance_state_pick', type:'select', options:[
         {name:'Sober / clear-headed', v:{RT:-0.2,SC:0,ER:-0.2,AR:0,DS:0.3,SR:0.3}},
         {name:'Mildly under the influence', v:{RT:0.8,SC:-0.3,ER:0.4,AR:-0.5,DS:-0.7,SR:-0.5}},
@@ -528,7 +537,7 @@ const LAYERS = [
       ]},
       {id:'substance_state_slider', type:'slider', prompt:'Alcohol or substance use noticeably changes my risk-taking and self-control', v:{RT:1.5,SC:-0.5,ER:0.5,AR:-0.8,DS:-1.2,SR:-0.5}},
     ]},
-    { id:'depression', title:'Depression — self-reported low mood / anhedonia (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 2)', micro:[
+    { id:'depression', title:'Depression — self-reported low mood / anhedonia (v6.1 -- see Architecture 3.2b.1 Domain 2)', micro:[
       {id:'depression_pick', type:'select', options:[
         {name:'No notable low mood', v:{RT:0.1,SC:0,ER:-0.1,AR:0,DS:0.2,SR:0.3}},
         {name:'Occasional low mood / reduced motivation', v:{RT:-0.5,SC:0.2,ER:0.5,AR:0.3,DS:-0.6,SR:-0.7}},
@@ -536,7 +545,7 @@ const LAYERS = [
       ]},
       {id:'depression_slider', type:'slider', prompt:'Low mood or lack of motivation has been affecting my daily functioning', v:{RT:-0.8,SC:0.2,ER:0.7,AR:0.4,DS:-1.0,SR:-1.5}},
     ]},
-    { id:'fear_failure', title:'Fear of failure / rejection sensitivity (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 2)', micro:[
+    { id:'fear_failure', title:'Fear of failure / rejection sensitivity (v6.1 -- see Architecture 3.2b.1 Domain 2)', micro:[
       {id:'fear_failure_pick', type:'select', options:[
         {name:'Low fear of failure', v:{RT:0.8,SC:-0.3,ER:-0.3,AR:-0.3,DS:0.6,SR:0.5}},
         {name:'Moderate fear of failure', v:{RT:-0.3,SC:0.4,ER:0.5,AR:0.5,DS:-0.5,SR:-0.4}},
@@ -544,7 +553,7 @@ const LAYERS = [
       ]},
       {id:'fear_failure_slider', type:'slider', prompt:'Fear of failing or being rejected strongly shapes what I choose to do', v:{RT:-1.2,SC:0.6,ER:1.0,AR:0.8,DS:-0.9,SR:-0.7}},
     ]},
-    { id:'emotional_trauma', title:'Emotional trauma, past or recent — self-described, non-diagnostic (v6.1 -- HIGH(triggered) tier ceiling 1.50 [triggered tier used; MODERATE applies to baseline state]; overlaps Family layer\'s "stability" sub -- treat jointly with care to avoid double-counting, see Architecture 3.2b.1 Domain 2)', micro:[
+    { id:'emotional_trauma', title:'Emotional trauma, past or recent — self-described, non-diagnostic (v6.1 -- overlaps Family layer\'s "stability" sub -- treat jointly with care to avoid double-counting, see Architecture 3.2b.1 Domain 2)', micro:[
       {id:'emotional_trauma_pick', type:'select', options:[
         {name:'No significant unresolved trauma', v:{RT:0.1,SC:0,ER:-0.1,AR:0,DS:0.1,SR:0.2}},
         {name:'Some past difficulty, mostly resolved', v:{RT:-0.2,SC:0.2,ER:0.5,AR:0.2,DS:-0.3,SR:-0.4}},
@@ -552,7 +561,7 @@ const LAYERS = [
       ]},
       {id:'emotional_trauma_slider', type:'slider', prompt:'Past difficult experiences still get triggered by things that remind me of them', v:{RT:-0.5,SC:0.3,ER:1.3,AR:0.3,DS:-0.7,SR:-1.2}},
     ]},
-    { id:'anger_resentment', title:'Anger and stored resentment (v6.1 -- HIGH(triggered) tier ceiling 1.50 [triggered tier used; MODERATE applies to chronic state], see Architecture 3.2b.1 Domain 2)', micro:[
+    { id:'anger_resentment', title:'Anger and stored resentment (v6.1 -- see Architecture 3.2b.1 Domain 2)', micro:[
       {id:'anger_resentment_pick', type:'select', options:[
         {name:'Rarely angry / lets things go', v:{RT:0.2,SC:-0.1,ER:-0.3,AR:-0.2,DS:0.4,SR:0.5}},
         {name:"Occasionally angry, doesn't linger long", v:{RT:0,SC:0.1,ER:0.4,AR:0.2,DS:-0.2,SR:-0.2}},
@@ -560,7 +569,7 @@ const LAYERS = [
       ]},
       {id:'anger_resentment_slider', type:'slider', prompt:'I hold onto anger or resentment longer than most people around me', v:{RT:0.4,SC:-0.2,ER:1.3,AR:-0.4,DS:-0.4,SR:-1.0}},
     ]},
-    { id:'shame', title:'Shame (v6.1 -- VERY HIGH tier ceiling 2.00, highest untapped weight in the 3.2b.1 catalogue, see Architecture 3.2b.1 Domain 2)', micro:[
+    { id:'shame', title:'Shame (v6.1 -- highest untapped weight in the 3.2b.1 catalogue, see Architecture 3.2b.1 Domain 2)', micro:[
       {id:'shame_pick', type:'select', options:[
         {name:'Rarely experiences shame', v:{RT:0.5,SC:-0.3,ER:-0.5,AR:-0.3,DS:0.5,SR:0.8}},
         {name:"Occasional shame, doesn't dominate self-view", v:{RT:-0.3,SC:0.5,ER:0.8,AR:0.5,DS:-0.5,SR:-0.6}},
@@ -568,7 +577,7 @@ const LAYERS = [
       ]},
       {id:'shame_slider', type:'slider', prompt:'Shame about who I am has a powerful, lasting effect on my choices', v:{RT:-1.0,SC:1.0,ER:1.8,AR:0.9,DS:-1.3,SR:-1.8}},
     ]},
-    { id:'core_values', title:'Core values / moral identity (v6.1 -- HIGH tier ceiling 1.50, see Architecture 3.2b.1 Domain 6 -- not a protected attribute; distinct from the excluded cultural/gender-identity rows in this Domain)', micro:[
+    { id:'core_values', title:'Core values / moral identity (v6.1 -- see Architecture 3.2b.1 Domain 6 -- not a protected attribute; distinct from the excluded cultural/gender-identity rows in this Domain)', micro:[
       {id:'core_values_pick', type:'select', options:[
         {name:'Values feel clear and rarely in conflict with choices', v:{RT:0.2,SC:-0.3,ER:-0.3,AR:-0.3,DS:0.8,SR:0.8}},
         {name:'Values are somewhat clear, occasional conflict', v:{RT:-0.1,SC:0.2,ER:0.3,AR:0.2,DS:-0.3,SR:-0.2}},
