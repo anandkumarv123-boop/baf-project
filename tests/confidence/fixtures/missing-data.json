@@ -1,0 +1,29 @@
+{
+  "description": "Only 3 of bio's 6 sub-layers answered, nothing else. bio's declared weight is 0.08, so expect low coverage on every dimension (well under 10%) even though the answered subs agree perfectly with each other.",
+  "precisionVectors": {
+    "energy": {
+      "RT": 1,
+      "SC": 0,
+      "ER": 0,
+      "AR": 0,
+      "DS": 0,
+      "SR": 0
+    },
+    "health": {
+      "RT": 1,
+      "SC": 0,
+      "ER": 0,
+      "AR": 0,
+      "DS": 0,
+      "SR": 0
+    },
+    "age": {
+      "RT": 1,
+      "SC": 0,
+      "ER": 0,
+      "AR": 0,
+      "DS": 0,
+      "SR": 0
+    }
+  }
+}
