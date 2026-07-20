@@ -1,5 +1,26 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Phase 1 (Scientific Scoring) of the BAF v2.0 roadmap: `docs/validation/weight-validation.md`,
+  `layer-validation.md`, and `confidence-validation.md` — a companion to `docs/WEIGHTS.md`
+  validating why each weight/layer is defensible and how sensitive scoring is to it.
+- `scripts/sensitivity-analysis.js` — perturbs the 8 `LAYER_WEIGHTS` at -20%/-10%/0%/+10%/+20%
+  against all golden profiles, writing `docs/reports/sensitivity-analysis.{csv,json,md}`.
+  Empirically confirmed (and documented) that `SUBACUTE_WEIGHT`, `SAME_LAYER_PAIR_WEIGHT`, and
+  `CROSS_LAYER_DISCOUNT` cannot be perturbed the same way `LAYER_WEIGHTS` can — they're `const`
+  primitives `computeEngine()` closes over internally, not read from the exported module
+  object at call time, unlike `LAYER_WEIGHTS` (a mutable object). Making them tunable is a
+  candidate follow-up but is a `core-engine.js` source change, not part of this diagnostic.
+- Extended `scripts/ablate-layer-weights.js` with baseline layer contribution, dimension
+  contribution, score variance, and completeness-coverage-variance stats, writing
+  `docs/reports/layer-contribution.md` in addition to its existing stdout report.
+- `npm run ablate-layer-weights` and `npm run sensitivity-analysis` — the former had no npm
+  wiring despite already being committed.
+- No changes to `src/core-engine.js` or scoring output — all of the above are read-only
+  diagnostics, same convention as `scripts/compare-golden.js`.
+
 ## [6.7.0] - 2026-07-19
 
 ### Fixed

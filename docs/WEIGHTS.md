@@ -2,20 +2,25 @@
 
 Read-only audit. Source: `src/core-engine.js` as of commit `02e3d49` (v6.7.0).
 
+See also `docs/validation/` for the Phase 1 companion docs that validate *why* each value
+below is defensible and *how sensitive* scoring is to it: `weight-validation.md`,
+`layer-validation.md`, and `confidence-validation.md`. Generated sensitivity/contribution
+numbers live in `docs/reports/` (`npm run sensitivity-analysis`, `npm run ablate-layer-weights`).
+
 ## (a) Cross-layer weights `W_ℓ`
 
-| Symbol | Value | File:Line | Type |
-|---|---|---|---|
-| `LAYER_WEIGHTS.geo` | 0.10 | core-engine.js:14 | Constant |
-| `LAYER_WEIGHTS.bio` | 0.08 | core-engine.js:14 | Constant |
-| `LAYER_WEIGHTS.family` | 0.18 | core-engine.js:14 | Constant |
-| `LAYER_WEIGHTS.culture` | 0.12 | core-engine.js:14 | Constant |
-| `LAYER_WEIGHTS.social` | 0.12 | core-engine.js:15 | Constant |
-| `LAYER_WEIGHTS.econ` | 0.14 | core-engine.js:15 | Constant |
-| `LAYER_WEIGHTS.cognitive` | 0.11 | core-engine.js:15 | Constant |
-| `LAYER_WEIGHTS.modulator` | 0.15 | core-engine.js:15 | Constant |
-| `SUBACUTE_WEIGHT` (Tier S reserved slice) | 0.06 | core-engine.js:35 | Constant |
-| `effectiveWeights[l]` (runtime, per-request) | `LAYER_WEIGHTS[l] * shrink` where `shrink = subacuteAnswered ? (1 - 0.06) : 1` | core-engine.js:252-255 | Computed |
+| Symbol | Value | File:Line | Type | Tag | Justification |
+|---|---|---|---|---|---|
+| `LAYER_WEIGHTS.geo` | 0.10 | core-engine.js:14 | Constant | | |
+| `LAYER_WEIGHTS.bio` | 0.08 | core-engine.js:14 | Constant | | |
+| `LAYER_WEIGHTS.family` | 0.18 | core-engine.js:14 | Constant | | |
+| `LAYER_WEIGHTS.culture` | 0.12 | core-engine.js:14 | Constant | | |
+| `LAYER_WEIGHTS.social` | 0.12 | core-engine.js:15 | Constant | | |
+| `LAYER_WEIGHTS.econ` | 0.14 | core-engine.js:15 | Constant | | |
+| `LAYER_WEIGHTS.cognitive` | 0.11 | core-engine.js:15 | Constant | | |
+| `LAYER_WEIGHTS.modulator` | 0.15 | core-engine.js:15 | Constant | | |
+| `SUBACUTE_WEIGHT` (Tier S reserved slice) | 0.06 | core-engine.js:35 | Constant | construct-derived | Set below the smallest layer weight (0.08) because Tier S currently holds only 2 sub-layers versus bio's 6; documented as a stopgap pending v7 design per the code comment at core-engine.js:18-34. |
+| `effectiveWeights[l]` (runtime, per-request) | `LAYER_WEIGHTS[l] * shrink` where `shrink = subacuteAnswered ? (1 - 0.06) : 1` | core-engine.js:252-255 | Computed | | |
 
 Notes:
 - The 8 `LAYER_WEIGHTS` values sum to 1.00 exactly; enforced by the test suite, not by the constant itself.
@@ -29,23 +34,21 @@ Notes:
 
 The confidence-ceiling magnitudes referenced in `core-engine.js`'s comments (lines 49-53, 60-64) live in `BAF_Simulator_v6.html`, upstream of `core-engine.js`, as descriptive text in each sub-layer's `title` string — not as an enforced numeric clamp anywhere in code (no `Math.min`/ceiling check found in either file):
 
-| Symbol | Value | File:Line | Type |
-|---|---|---|---|
-| `nutrition` confidence ceiling | 1.00 | BAF_Simulator_v6.html:216 | Constant (documented in `title` string only; not enforced in code) |
-| `temperament` confidence ceiling | 1.25 | BAF_Simulator_v6.html:224 | Constant (documented in `title` string only; not enforced in code) |
-| `ace` confidence ceiling | 1.50 (title also notes "confidence-confirmed 1.00x" — i.e. not reduced from the raw HIGH-tier ceiling) | BAF_Simulator_v6.html:284 | Constant (documented in `title` string only; not enforced in code) |
-
-Not yet tagged per the follow-up plan (axiomatic / construct-derived / empirically anchored / dampener-derived) — this pass is inventory-only.
+| Symbol | Value | File:Line | Type | Tag | Justification |
+|---|---|---|---|---|---|
+| `nutrition` confidence ceiling | 1.00 | BAF_Simulator_v6.html:216 | Constant (documented in `title` string only; not enforced in code) | construct-derived | Direction of adjustment (reduce from naive HIGH 1.50) is anchored in a specific methodological critique of Danziger, Levav & Avnaim-Pesso 2011 by Weinshall-Margel & Shapard 2011 and Glockner 2016, per BAF_Technical_Architecture.docx Section 3.2b.4. The specific magnitude (1.00 rather than any other reduced value) is an authored judgment call, not derived from a stated formula. |
+| `temperament` confidence ceiling | 1.25 | BAF_Simulator_v6.html:224 | Constant (documented in `title` string only; not enforced in code) | construct-derived | Direction of adjustment (reduce from naive HIGH 1.50) is anchored in the twin-study vs. molecular-genetic heritability gap (Jang et al. 1996/1998 at 40-60% vs. Power & Pluess 2015 at 15-21%), per BAF_Technical_Architecture.docx Section 3.2b.4. The specific magnitude (1.25 rather than any other reduced value) is an authored judgment call, not derived from the cited studies. |
+| `ace` confidence ceiling | 1.50 (title also notes "confidence-confirmed 1.00x" — i.e. not reduced from the raw HIGH-tier ceiling) | BAF_Simulator_v6.html:284 | Constant (documented in `title` string only; not enforced in code) | construct-derived | Retention at full 1.50 is anchored in Felitti et al. 1998 being independently verified as stronger than the paper's own citation implied, per BAF_Technical_Architecture.docx Section 3.2b.4 ("one of the best-replicated effects in the whole catalogue"). Unlike nutrition and temperament, no downward adjustment was warranted, so magnitude equals the naive tier baseline. |
 
 ## (c) Dampener strength `λ` and correlation coefficients `ρ_ℓk`
 
-| Symbol | Value | File:Line | Type |
-|---|---|---|---|
-| Same-layer dampener fold (`CORRELATED_PAIRS`) | `['attachment_style', 'parenting']` | core-engine.js:124-126 | Constant (list) |
-| `SAME_LAYER_PAIR_WEIGHT` (same-layer dampener strength) | 0.5 per member (each counts at 50% within its folded slot) | core-engine.js:124 (constant), 138-139 (use) | Constant |
-| `CROSS_LAYER_DISCOUNT` (cross-layer dampener `λ`) | 0.5 | core-engine.js:179 | Constant |
-| Cross-layer dampener pairs (`CROSS_LAYER_PAIRS`) | `['emotional_trauma', 'stability']` | core-engine.js:180-182 | Constant (list) |
-| `applyCrossLayerDampener` scaling | `scaleVec(subScores[a], CROSS_LAYER_DISCOUNT)` / same for `b` | core-engine.js:195-196 | Computed |
+| Symbol | Value | File:Line | Type | Tag | Justification |
+|---|---|---|---|---|---|
+| Same-layer dampener fold (`CORRELATED_PAIRS`) | `['attachment_style', 'parenting']` | core-engine.js:124-126 | Constant (list) | axiomatic | Pair inclusion is a structural judgment by the catalogue author, per BAF_Technical_Architecture.docx Section 8e: "Two sub-layer pairs were flagged as knowingly overlapping since v6.1... Both risked double-counting." No citation to attachment theory (Bowlby/Ainsworth) or empirical correlation coefficient. The axiom accepted is that the catalogue author's structural read of construct overlap governs pair membership. |
+| `SAME_LAYER_PAIR_WEIGHT` (same-layer dampener strength) | 0.5 per member (each counts at 50% within its folded slot) | core-engine.js:124 (constant), 138-139 (use) | Constant | axiomatic | Structural artifact of a symmetric 2-way pairwise average; equal weight per member is the null hypothesis in the absence of a directional prior distinguishing CORRELATED_PAIRS members. |
+| `CROSS_LAYER_DISCOUNT` (cross-layer dampener `λ`) | 0.5 | core-engine.js:179 | Constant | axiomatic | 0.5 is the neutral symmetric prior in the absence of a measured ρ; provisional pending independent citation quantifying emotional_trauma × stability correlation. Explicitly flagged as not citation-derived at core-engine.js:150-178. |
+| Cross-layer dampener pairs (`CROSS_LAYER_PAIRS`) | `['emotional_trauma', 'stability']` | core-engine.js:180-182 | Constant (list) | axiomatic | Same basis as CORRELATED_PAIRS: catalogue-author judgment about overlapping constructs, not a cited correlation. BAF_Technical_Architecture.docx Section 8f explicitly disclaims empirical rigor for the associated discount strength; the pair membership itself is on the same footing. |
+| `applyCrossLayerDampener` scaling | `scaleVec(subScores[a], CROSS_LAYER_DISCOUNT)` / same for `b` | core-engine.js:195-196 | Computed | | |
 
 Notes:
 - There is **no continuous correlation coefficient `ρ_ℓk`** anywhere in this file. Both dampeners are binary/structural: a pair is either on a fixed list (fully dampened when both members are answered) or absent (undampened). No graduated correlation strength is modeled or estimated from data.
@@ -55,12 +58,12 @@ Notes:
 
 ## (d) Threshold constants
 
-| Symbol | Value | File:Line | Wired into scoring | Tag |
-|---|---|---|---|---|
-| `NEUTRAL_EPSILON` | 0.05 | scripts/consistency-check.js:15 | Yes — `checkConsistency` is imported and used live in `src/server.js:16` | |
+| Symbol | Value | File:Line | Wired into scoring | Tag | Justification |
+|---|---|---|---|---|---|
+| `NEUTRAL_EPSILON` | 0.05 | scripts/consistency-check.js:15 | Yes — `checkConsistency` is imported and used live in `src/server.js:16` | undetermined | Comment at scripts/consistency-check.js:1-30 states 0.05 was chosen to match SIGNIFICANT_DELTA in scripts/compare-golden.js, described as "comfortably above noise, comfortably below signal." No quantified noise floor or signal size is provided anywhere in the repo. The stated rationale cross-references one round number to another rather than deriving from a measurement or principle. |
 
 ## (e) Informational-only staleness flags
 
-| Symbol | Value | File:Line | Wired into scoring | Tag |
-|---|---|---|---|---|
-| `SUBACUTE_EXPIRY_DAYS` | 35 | core-engine.js:44 | a staleness threshold, not a weight; informational-only, does not affect `finalVec` | |
+| Symbol | Value | File:Line | Wired into scoring | Tag | Justification |
+|---|---|---|---|---|---|
+| `SUBACUTE_EXPIRY_DAYS` | 35 | core-engine.js:44 | a staleness threshold, not a weight; informational-only, does not affect `finalVec` | axiomatic | Midpoint of the documented 4-6 week re-prompt window; the axiom is that neither edge of the stated window has independent defense over the other, so the midpoint is the neutral choice. |
