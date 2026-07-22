@@ -1,0 +1,389 @@
+{
+  "description": "All 48 sub-layers answered with an identical vector, including both dampener pairs (attachment_style/parenting, emotional_trauma/stability) matching each other. Expect ~100% coverage on every dimension, 0 contradictionPenalty, high consistency -> Very Strong.",
+  "precisionVectors": {
+    "terrain": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "climate": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "density": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "energy": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "health": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "age": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "nutrition": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "temperament": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "cognitive_style": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "parenting": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "birthorder": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "stability": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "attachment_style": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "past_failures": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "ace": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "collectivism": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "tradition": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "density_net": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "digital_ratio": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "social_comparison": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "relationship_conflict": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "social_exclusion": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "loneliness": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "current_stability": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "formative_scarcity": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "time_pressure": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "education": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "schema_flex": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "cognitive_overload": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "decision_fatigue": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "anchoring_framing": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "sunk_cost": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "availability_heuristic": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "info_overload": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "ego": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "stress": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "sleep": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "dehydration": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "hormonal": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "substance_state": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "depression": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "fear_failure": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "emotional_trauma": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "anger_resentment": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "shame": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "core_values": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "grief": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "life_transitions": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    }
+  }
+}

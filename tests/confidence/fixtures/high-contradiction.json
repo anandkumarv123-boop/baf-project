@@ -1,0 +1,245 @@
+{
+  "description": "Most layers answered consistently (decent coverage), but both known-correlated pairs (attachment_style/parenting; emotional_trauma/stability) are answered with maximally opposite (+2/-2) vectors. Expect high contradictionPenalty (~100) on every dimension despite otherwise-respectable coverage, pulling evidenceStrength down.",
+  "precisionVectors": {
+    "terrain": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "climate": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "density": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "energy": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "health": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "age": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "nutrition": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "collectivism": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "tradition": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "current_stability": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "formative_scarcity": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "time_pressure": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "birthorder": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "past_failures": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "ace": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "attachment_style": {
+      "RT": 2,
+      "SC": 2,
+      "ER": 2,
+      "AR": 2,
+      "DS": 2,
+      "SR": 2
+    },
+    "parenting": {
+      "RT": -2,
+      "SC": -2,
+      "ER": -2,
+      "AR": -2,
+      "DS": -2,
+      "SR": -2
+    },
+    "ego": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "stress": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "sleep": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "dehydration": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "hormonal": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "substance_state": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "depression": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "fear_failure": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "anger_resentment": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "shame": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "core_values": {
+      "RT": 1,
+      "SC": 1,
+      "ER": 1,
+      "AR": 1,
+      "DS": 1,
+      "SR": 1
+    },
+    "emotional_trauma": {
+      "RT": 2,
+      "SC": 2,
+      "ER": 2,
+      "AR": 2,
+      "DS": 2,
+      "SR": 2
+    },
+    "stability": {
+      "RT": -2,
+      "SC": -2,
+      "ER": -2,
+      "AR": -2,
+      "DS": -2,
+      "SR": -2
+    }
+  }
+}

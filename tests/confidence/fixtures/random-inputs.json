@@ -1,0 +1,133 @@
+{
+  "description": "A fixed, deterministic, irregular scatter of answers (not a whole-layer or uniform pattern) across ~16 subs spanning most layers, including Tier S (grief) and both dampener pairs with partial disagreement. Used for bounds/fuzz assertions (confidence in [0,100], evidenceStrength always a valid bucket, no NaN/undefined) rather than exact-value assertions.",
+  "precisionVectors": {
+    "terrain": {
+      "RT": 2,
+      "SC": -1,
+      "ER": 0.5,
+      "AR": -2,
+      "DS": 1,
+      "SR": 0
+    },
+    "climate": {
+      "RT": -1.5,
+      "SC": 1,
+      "ER": -0.5,
+      "AR": 0,
+      "DS": 2,
+      "SR": -2
+    },
+    "energy": {
+      "RT": 0,
+      "SC": 2,
+      "ER": -2,
+      "AR": 1,
+      "DS": -1,
+      "SR": 0.5
+    },
+    "nutrition": {
+      "RT": 1,
+      "SC": -1,
+      "ER": 1,
+      "AR": -1,
+      "DS": 1,
+      "SR": -1
+    },
+    "parenting": {
+      "RT": -2,
+      "SC": 0,
+      "ER": 1.5,
+      "AR": -0.5,
+      "DS": 2,
+      "SR": -1
+    },
+    "attachment_style": {
+      "RT": 1,
+      "SC": 1,
+      "ER": -1,
+      "AR": 0.5,
+      "DS": -2,
+      "SR": 2
+    },
+    "collectivism": {
+      "RT": 0.5,
+      "SC": -0.5,
+      "ER": 2,
+      "AR": -2,
+      "DS": 1,
+      "SR": -1
+    },
+    "social_exclusion": {
+      "RT": -2,
+      "SC": 2,
+      "ER": 0,
+      "AR": 0,
+      "DS": -1,
+      "SR": 1
+    },
+    "loneliness": {
+      "RT": 1.5,
+      "SC": -1.5,
+      "ER": 1,
+      "AR": -1,
+      "DS": 0,
+      "SR": 0
+    },
+    "current_stability": {
+      "RT": -1,
+      "SC": 1,
+      "ER": -1,
+      "AR": 1,
+      "DS": -1,
+      "SR": 1
+    },
+    "schema_flex": {
+      "RT": 2,
+      "SC": 2,
+      "ER": -2,
+      "AR": -2,
+      "DS": 0,
+      "SR": 0
+    },
+    "sunk_cost": {
+      "RT": -0.5,
+      "SC": 0.5,
+      "ER": -1.5,
+      "AR": 1.5,
+      "DS": -1,
+      "SR": 1
+    },
+    "ego": {
+      "RT": 1,
+      "SC": -2,
+      "ER": 2,
+      "AR": -1,
+      "DS": 0.5,
+      "SR": -0.5
+    },
+    "emotional_trauma": {
+      "RT": -1,
+      "SC": 1,
+      "ER": 1,
+      "AR": -1,
+      "DS": 2,
+      "SR": -2
+    },
+    "stability": {
+      "RT": 1,
+      "SC": -1,
+      "ER": -1,
+      "AR": 1,
+      "DS": -2,
+      "SR": 2
+    },
+    "grief": {
+      "RT": 0.5,
+      "SC": -0.5,
+      "ER": 1,
+      "AR": -1,
+      "DS": 0,
+      "SR": 0.5
+    }
+  }
+}

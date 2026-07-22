@@ -1,0 +1,21 @@
+{
+  "description": "Only attachment_style and parenting answered, maximally opposite (+2/-2). Low coverage (2 of family's 6 subs, family weight 0.18) combined with maximal contradictionPenalty -- worst-case combined fixture, expect confidence to clamp near 0, Very Weak.",
+  "precisionVectors": {
+    "attachment_style": {
+      "RT": 2,
+      "SC": 2,
+      "ER": 2,
+      "AR": 2,
+      "DS": 2,
+      "SR": 2
+    },
+    "parenting": {
+      "RT": -2,
+      "SC": -2,
+      "ER": -2,
+      "AR": -2,
+      "DS": -2,
+      "SR": -2
+    }
+  }
+}

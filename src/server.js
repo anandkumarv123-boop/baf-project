@@ -14,6 +14,7 @@ const { computeEngine, LAYER_WEIGHTS, ALL_SUB_IDS, DIMS } = require('./core-engi
 const store = require('./store');
 const { SCENARIOS, getScenario, getOption } = require('../scripts/scenario-bank');
 const { checkConsistency } = require('../scripts/consistency-check');
+const { build: buildConfidenceReport } = require('./confidence');
 
 const app = express();
 app.use(cors());
@@ -77,6 +78,11 @@ app.post('/v1/profile', async (req, res) => {
     totalSubs: result.totalSubs,
     completeness: result.completeness,
     confidence: result.completeness >= 0.85 ? 'High' : result.completeness >= 0.6 ? 'Moderate' : 'Partial — low confidence',
+    // Additive only (Phase 2 / Confidence Engine, src/confidence/) -- a per-dimension
+    // confidence envelope alongside the pre-existing completeness-threshold `confidence`
+    // string above. `finalScore`/`confidence`/`perLayer` etc. are all untouched; no existing
+    // consumer of this response needs to change. See docs/confidence-engine.md.
+    confidenceReport: buildConfidenceReport(result),
     subacuteStale: result.subacuteStale,
     staleSubacuteSubs: result.staleSubacuteSubs,
     narrative: buildNarrative(result.finalVec, result.answeredSubsTotal, result.totalSubs),

@@ -20,6 +20,23 @@
   wiring despite already being committed.
 - No changes to `src/core-engine.js` or scoring output — all of the above are read-only
   diagnostics, same convention as `scripts/compare-golden.js`.
+- Phase 2 (Confidence Engine) of the BAF v2.0 roadmap: `src/confidence/` (`EvidenceCoverage`,
+  `ContradictionAnalyzer`, `EvidenceStrength`, `ConfidenceEstimator`, `ConfidenceReport`) and
+  `config/confidenceConfig.js` — a per-dimension confidence envelope (`score`, `confidence`,
+  `evidenceStrength`, `evidenceCoverage`, `contradictionPenalty`, `metadata` per `RT/SC/ER/AR/
+  DS/SR`) computed from an existing `computeEngine()` result. All tunables live in the mutable
+  `confidenceConfig.js` object (never `const` primitives) — the direct fix for the failure
+  mode Phase 1 found in `SUBACUTE_WEIGHT`/`SAME_LAYER_PAIR_WEIGHT`/`CROSS_LAYER_DISCOUNT`,
+  proven by `tests/confidence/mutability.test.js`. `reliability` is deliberately absent
+  (deferred to Phase 3, pending a multi-submission data model). See
+  `docs/confidence-engine.md`.
+- `src/server.js`'s `POST /v1/profile` response gains a new, additive `confidenceReport`
+  field; `finalScore`, the existing `confidence` string, and every other field are untouched.
+- `npm run test:confidence` (folded into `npm test`) — 5 new test files under
+  `tests/confidence/`, same plain `check()`/exit-code convention as `tests/test-cases.js` (no
+  new test-framework dependency).
+- No changes to `src/core-engine.js` or anything it imports; golden-profile drift is 0/15 by
+  construction.
 
 ## [6.7.0] - 2026-07-19
 

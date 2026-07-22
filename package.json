@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "migrate": "node scripts/migrate.js",
-    "test": "node tests/test-cases.js && node scripts/backtest.js",
+    "test": "node tests/test-cases.js && node scripts/backtest.js && npm run test:confidence",
+    "test:confidence": "node tests/confidence/ConfidenceEstimator.test.js && node tests/confidence/EvidenceCoverage.test.js && node tests/confidence/EvidenceStrength.test.js && node tests/confidence/ContradictionAnalyzer.test.js && node tests/confidence/mutability.test.js",
     "backtest": "node scripts/backtest.js",
     "golden-profiles": "node scripts/golden-profiles.js",
     "compare-golden": "node scripts/compare-golden.js",
